@@ -4,17 +4,18 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
-        <title>本地相册</title>
-		<link href="/public/common/favicon-32x32.ico" rel="shortcut icon" type="image/x-icon"/>
-        <link href="/public/common/favicon-32x32.ico" rel="icon"/>
-        <link href="/public/ajax/libs/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
-        <link rel="stylesheet" href="/public/common/index.css?v=0.01"/>
+        <base href="/factory/">
+        <title>相册详情</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
         <style type="text/css">
             *{padding: 0; margin: 0; font-size: 12px;}
             html{zoom:1;}
             html,body,#app{width: 100%; height: 100%; overflow: hidden;}
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( '/public/common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
             #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
@@ -30,7 +31,7 @@
             #app-content{flex-grow: 1; overflow: hidden;}
             /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
         </style>
-        <link rel="stylesheet" href="detail.css">
+        <link rel="stylesheet" href="album/detail.css">
 	</head>
 	<body>
         <div id="app" v-cloak>
@@ -126,7 +127,7 @@
                                     <li class="design-item" v-if="!image.hidden" style="width:100px;">
                                         <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
                                             <!-- fit="contain" style="width: 100%; height: 100%;" 为确保图片能够按比例显示，这两个样式都要保留 -->
-                                            <el-image :src="'/' + image.url" :lazy="true" fit="contain" style="width: 100%; height: 100%;" :preview-src-list="['/'+image.url]" crossorigin="anonymous"></el-image>
+                                            <el-image :src="image.url" fit="contain" style="width: 100%; height: 100%;" :preview-src-list="[image.url]" crossorigin="anonymous" ></el-image>
                                         </p>
                                         <p class="design-name" style="font-size:12px; width:100%;">
                                             <span class="editable-text" style="font-size:12px;"><!-- contenteditable="true" -->
@@ -147,12 +148,15 @@
                 </el-container>
             </div>
         </div>
-        <script src="/public/ajax/libs/vue/2.6.12/vue.min.js" type="application/javascript"></script>
-        <script src="/public/ajax/libs/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
-        <script src="/public/ajax/libs/axios/0.26.0/axios.min.js" type="application/javascript"></script>
-        <script src="/public/ajax/libs/clipboard.js/2.0.10/clipboard.min.js" type="application/javascript"></script>
-        <script src="/public/ajax/libs/clipboard-polyfill/3.0.3/main/clipboard-polyfill.min.js" type="application/javascript"></script>
-        <script type="text/javascript" src="/public/common/index.js?v=0.01"></script>
-        <script src="detail.js?v=0.01"></script>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+        <!-- <script src="/public/ajax/libs/clipboard.js/2.0.10/clipboard.min.js" type="application/javascript"></script>
+        <script src="/public/ajax/libs/clipboard-polyfill/3.0.3/main/clipboard-polyfill.min.js" type="application/javascript"></script> -->
+        <script type="text/javascript" src="common/index.js?v=0.01"></script>
+        <script type="text/javascript" src="app/service/album.js"></script>
+        <script src="album/detail.js?v=0.01"></script>
 	</body>
 </html>

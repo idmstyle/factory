@@ -1,3 +1,5 @@
+ if (typeof axios == 'function') axios.defaults.baseURL = 'http://localhost:7001';
+
 /**
  * 获取系统环境标识
  * 

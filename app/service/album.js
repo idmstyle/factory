@@ -13,6 +13,10 @@ class AlbumService {
         return result.length == 1 ? result[0] : null;
     }
 
+    async findById(id) {
+        return await this.db.get(id);
+    }
+
     async findByCode(code) {
         const selector = {code: code};
         return this.find({selector: selector});
@@ -78,6 +82,9 @@ class AlbumService {
 
     
     async upsert(doc, options = {}) {
+        // @TODO: 客户端必须提供一个接收相册id、相册本地目录对照关系的接口
+        // 客户端不存储对照关系，就无法处理storage信息
+
         if (doc._id) return this.update(doc, options);
 
         return this.create(doc, options);

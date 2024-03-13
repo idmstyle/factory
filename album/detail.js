@@ -6,6 +6,8 @@ const ALBUM_ID = (() => {
     return params.get('id') || '';
 })();
 
+const albumService = new AlbumService();
+
 const vm = new Vue({
     delimiters: ['<{', '}>'],
 	el: '#app',
@@ -30,18 +32,29 @@ const vm = new Vue({
         album: {},
         category: null,
         files: [],
-        uploadData: {}
+        uploadData: {},
+        baseURL: axios.defaults.baseURL,
     },
     mounted: async function () {
-        const response = await axios.get(`/api/albums/${ALBUM_ID}`);
-        this.album = response.data;
+        // const response = await axios.get(`/api/albums/${ALBUM_ID}`);
+        // this.album = response.data;
+        const album = await albumService.findById(ALBUM_ID);
+        this.album = album;
+
 
         // 在页面标题中显示更多信息，便于切换用户快速定位相应的标签页
         document.title = `${this.album.code} ${this.album.name} - 本地相册`;
 
         // 这里不能使用axios.get(XXXX).then的形式，VUE会报images未定义的错误
-        const imgResp = await axios.get(`/api/album-images?album_code=${this.album.code}&album_id=${this.album._id}`);
-        this.images = imgResp.data;
+        const imgResp = await axios.get(`/api/album-images?album_code=${this.album.code}&album_id=${ALBUM_ID}`);
+        const images = imgResp.data;
+
+        for(let image of images) {
+            if (image.url.startsWith('http') || image.url.startsWith('//')) continue;
+            image.url = this.baseURL + '/' + image.url
+        }
+
+        this.images = images;
 
         // this.uploadData = {
         //     '_token': window.csrf_token,
@@ -68,13 +81,8 @@ const vm = new Vue({
     },
 	methods: {
         handleUpdateAlbum: async function () {
-			const response = await axios.put(`/api/albums/${ALBUM_ID}`, this.album, {responseType: 'json'});
-			if (response.status >= 200 && response.status < 300) {
-				this.$message({type: 'success', message: '更新成功'});
-				this.editFormVisible = false;
-			} else {
-				this.$message.error('更新出错，请稍后重试');
-			}
+            const result = await albumService.upsert(this.album);
+            result.ok ? this.$message({type: 'success', message: '更新成功'}) : this.$message.error('更新出错，请稍后重试');
         },
 		handleImageRemove: async function(index) {
 			this.images.splice(index, 1);
