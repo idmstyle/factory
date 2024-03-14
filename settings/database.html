@@ -54,13 +54,14 @@
                 </el-header>
                 <el-main id="frame-main">
                     <el-table :data="dbs" :default-sort = "{prop: 'code', order: 'descending'}" stripe style="width: 100%;" height="100%" row-key="code" :highlight-current-row="true" size="mini">
-                        <el-table-column prop="name" label="名称" width="120"></el-table-column>
-                        <el-table-column label="操作" align="center">
+                        <el-table-column prop="name" label="名称" width="240"></el-table-column>
+                        <el-table-column label="操作" align="center" width="240">
                             <template slot-scope="scope">
                                 <el-button type="text" v-on:click="handleExportItem(scope.row)" size="mini">导出</el-button>
                                 <el-button type="text" v-on:click="handleImportItem(scope.row)" size="mini">导入</el-button>
                             </template>
                         </el-table-column>
+                        <el-table-column label="其他" align="center"></el-table-column>
                     </el-table>
                 </el-main>
             </el-container>
@@ -136,6 +137,10 @@
         <script type="text/javascript" src="common/index.js?v=0.01"></script>
         <script type="text/javascript" src="app/service/album.js"></script>
         <script type="text/javascript" src="app/service/shape.js"></script>
+        <script type="text/javascript" src="app/service/template.js"></script>
+        <script type="text/javascript" src="app/service/template-image.js"></script>
+        <script type="text/javascript" src="app/service/template-shape.js"></script>
+        <script type="text/javascript" src="app/service/sku.js"></script>
         <script src="settings/database.js?v=0.01"></script>
 	</body>
 </html>

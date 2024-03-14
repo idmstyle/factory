@@ -2,6 +2,10 @@
 const DB_TYPES = [
     { name: '本地相册', service: new AlbumService() },
     { name: '印花模板', service: new ShapeService() },
+    { name: '效果图模板', service: new TemplateService() },
+    { name: '效果图模板图片', service: new TemplateImageService() },
+    { name: '效果图模板对应印花', service: new TemplateShapeService() },
+    { name: '货号对应印花', service: new SkuService() },
 ];
 
 async function importDocs(service, docs) {
@@ -32,6 +36,17 @@ async function importDocs(service, docs) {
 
     return true;
 }
+
+async function importDocsOld(service, url) {
+    const data = await fetch(url).then(response => response.json() );
+    const docs = [];
+    for(let item of data) {
+        docs.push(item.doc);
+    }
+
+    importDocs(service, docs);
+}
+// importDocsOld(new TemplateService(), 'settings/demo.json')
 
 const vm = new Vue({
     el: '#app',

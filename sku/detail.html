@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="/factory/">
+        <title>货号管理</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            /* #app-header .menu-container li:hover,#app-header .menu-container li.hover{background-color: white;}
+            #app-header .menu-container li:hover a,#app-header .menu-container li.hover a{color: black;} */
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+            /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
+        </style>
+        <link rel="stylesheet" href="sku/detail.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+            <el-container>
+                <el-aside width="280px" style="height:100%; background-color:white; /*border-right:1px solid #eee;*/" v-cloak>
+                    <div style="height:35px; border-bottom:1px solid #eee; line-height:35px; padding: 0 10px; font-size:14px; color:#606266; ">货号管理</div>
+                    <el-form size="mini" label-width="54px" style="margin:10px;">
+                        <el-form-item label="货号">
+                            <el-input name="skuId" v-model="skuId" placeholder="例：20000101" v-on:keyup.enter.native="handleSearch">
+                                <!-- <i slot="suffix" class="el-input__icon el-icon-search"></i> -->
+                                <el-button slot="append" icon="el-icon-search" v-on:click="handleSearch"></el-button>
+                            </el-input>
+                            <!-- <el-button type="primary" v-on:click="handleSearch">查询</el-button> -->
+                            <!-- style="width:130px;"  -->
+                        </el-form-item>
+                        <el-form-item label="名称">
+                            <el-input v-model="skuInfo.name" placeholder="产品名称或者描述"></el-input>
+                        </el-form-item>
+                        <el-form-item label="产品图">
+                            <el-input type="textarea" autosize v-model="skuInfo.image_url" placeholder="产品图链接"></el-input>
+                        </el-form-item>
+                        <el-form-item label="预览" v-if="skuInfo.image_url">
+                            <el-image :src="skuInfo.image_url" style="width:100px;">
+                                <div slot="error" class="image-slot">
+                                    <i class="el-icon-picture-outline"></i>
+                                </div>
+                            </el-image>
+                        </el-form-item>
+                        <el-form-item>
+                            <!-- <el-button v-on:click="handleSaveSkuInfo">保存</el-button> -->
+                        </el-form-item>
+                    </el-form>
+                </el-aside>
+                <el-main class="content-main" style="padding-left:10px;" v-cloak>
+                    <el-table :data="shapes" row-key="id" stripe size="mini" height="100%">
+                        <el-table-column type="index" label="序号" align="center"></el-table-column>
+                        <el-table-column prop="shape_tpl_id" label="形状" width="120" header-align="center" align="center">
+                            <template slot-scope="scope">
+                                <el-select v-model="scope.row.shape_tpl_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
+                                    <el-option v-for="item in preshapes" :key="item.id" :label="item.shape_text" :value="item.id"></el-option>
+                                </el-select>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="width" label="宽" align="center" width="70"></el-table-column>
+                        <el-table-column prop="height" label="高" align="center" width="70"></el-table-column>
+                        <el-table-column prop="sort" label="排序" align="center" width="70"></el-table-column>
+                        <!-- <el-table-column prop="col_span" label="列间距" align="center" width="70"></el-table-column> -->
+                        <el-table-column prop="image_url" label="图片地址" width="260px">
+                            <template slot="header" slot-scope="scope">
+                                图片地址
+                                <!-- <el-popover effect="dark" placement="right" width="300" trigger="hover" :content="'图片根目录：'+imageBasePath">
+                                    <i slot="reference" class="el-icon-info"></i>
+                                </el-popover> -->
+                            </template>
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.image_url" size="mini" v-on:change="imageUrlChangeHandle(scope.$index, scope.row)" placeholder="点击右侧选择按钮进行选择">
+                                    <i 
+                                        slot="suffix"
+                                        title="从相册中选择"
+                                        class="el-icon-folder-opened el-input__icon"
+                                        v-on:click="handleShowImageSelector(scope.$index, scope.row)"
+                                        style="cursor: pointer;">
+                                    </i>
+                                </el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="image_url" label="预览" width="70px">
+                            <template slot-scope="scope" v-if="scope.row.image_url">
+                                <el-image shape="square" style="width:20px; vertical-align: middle;" fit="contain" :src="scope.row.image_url" :preview-src-list="[scope.row.image_url]">
+                                    <div slot="error" class="image-slot">
+                                        <i class="el-icon-picture-outline"></i>
+                                    </div>
+                                </el-image>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" align="left" width="200px">
+                            <template slot-scope="scope" v-if="scope.row.width > 0">
+                                <i class="el-icon-copy-document el-icon-button" v-on:click="handleShapeClone(scope.$index, scope.row)" title="复制"></i>
+                                <el-popover
+                                    v-model="deletePopoverVisible[scope.$index]"
+                                    width="100"
+                                    trigger="click">
+                                    <div>操作无法撤销，确定要删除吗？</div>
+                                    <div style="text-align: right; margin: 0">
+                                        <el-button size="mini" type="text" v-on:click="hideDeletePopover(scope.$index)">取消</el-button>
+                                        <el-button type="text" size="mini" v-on:click="handleShapeReset(scope.$index, scope.row)">确定</el-button>
+                                    </div>
+                                    <i class="el-icon-delete el-icon-button" slot="reference" style="color: red;" title="删除"></i>
+                                </el-popover>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label=""></el-table-column>
+                    </el-table>
+                </el-main>
+            </el-container>
+            <el-dialog title="选择图片" :visible.sync="imageSelectorDialogVisible" custom-class="image-selector-dialog" v-on:opened="handleSelectorDialogOpened" width="80%" v-cloak>
+                <div slot="title">
+                    <el-form size="mini" :inline="true">
+                        <el-form-item label="相册编号">
+                            <el-input v-model="skuInfo.albumcode" size="mini" style="width:160px;"></el-input>
+                        </el-form-item>
+                        <el-button size="mini" v-on:click="handleThemeSearch">搜索</el-button>
+                    </el-form>
+                </div>
+                <div style="height:440px; overflow-y:auto;">
+                    <ul id="design-list" v-if="theme.images.length>0">
+                        <template v-for="(image,index) of theme.images" >
+                            <li class="design-item" v-if="!image.hidden" v-on:click="handleImageSelect(index, image)" style="cursor:pointer;">
+                                <p class="design-image-wrapper"><img :src="image.url" /></p>
+                                <p class="design-name">
+                                    <span class="editable-text">
+                                        <{image.basename}>
+                                        <template v-if="image.category!='圆形'">(<{image.category}>)</template>
+                                    </span>
+                                    <!-- <span v-show="options.quantityShow">-</span> -->
+                                    <!-- <span v-show="options.quantityShow" contenteditable="true" class="editable-text">${image.quantity}</span><span class="unit-name" v-show="options.quantityShow">${options.unitName}</span> -->
+                                </p>
+                            </li>
+                            <li class="design-item hidden" v-else>
+                                <p class="design-image-wrapper"><img src="" /></p>
+                                <p class="design-name"></p>
+                            </li>
+                        </template>
+                    </ul>
+                    <el-empty class="design-list-empty" v-else description="图片库空空如也"></el-empty>
+                </div>
+                <div slot="footer" class="dialog-footer">
+                    <el-button v-on:click="imageSelectorDialogVisible = false" size="mini">取 消</el-button>
+                    <!-- <el-button type="primary" v-on:click="handleUpdateTheme" size="mini">确 定</el-button> -->
+                </div>
+            </el-dialog>
+        </div>
+
+        <script>
+            window.skuCode = window.skuId = '{{ skuCode }}';
+        </script>
+
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+        <script type="text/javascript" src="common/index.js?v=0.01"></script>
+        <script type="text/javascript" src="app/service/shape.js"></script>
+        <script type="text/javascript" src="app/service/sku-shape.js"></script>
+        <script type="text/javascript" src="app/service/sku.js"></script>
+        <script src="sku/detail.js?v=0.01"></script>
+	</body>
+</html>

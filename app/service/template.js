@@ -1,8 +1,8 @@
-class AlbumService {
+class TemplateService {
     db;
 
     constructor() {
-        this.dbName = 'albums';
+        this.dbName = 'templates';
         this.db = new PouchDB(this.dbName);
     }
 
@@ -59,7 +59,7 @@ class AlbumService {
         doc._rev = undefined;
 
         const exists = await this.findByCode(doc.code);
-        if(exists && exists._id) throw new Error('相册短代码冲突', {cause: 409});
+        if(exists && exists._id) throw new Error('短代码冲突:' + doc.code, {cause: 409});
 
         return await this.db.post(doc, options);
     }

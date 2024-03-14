@@ -1,0 +1,18 @@
+/* --------------------------------- 模块样式：开始 ----------------------------------------*/
+.list-item{ display:inline-block; margin-bottom:20px; margin-right:10px; width: 640px; background-size:60px 60px; background-repeat: no-repeat; background-position: 5px 5px;}
+.list-item .el-card__body{padding: 0;}
+.sku-image{position:absolute; width:50px; left:-10px; top:-15px;}
+.sku-image [class^="el-icon"]{font-size: 50px;}
+.el-message--error a{text-decoration: none; color: #409eff;}
+
+.image-selector-dialog .el-dialog__body{padding-top:0px;}
+
+#design-list{background-color: white; /* display: flex; flex-wrap: wrap; justify-content: flex-start; align-content: flex-start;*/}
+#design-list *{font-family: 'Noto Serif','HarmonyOS Sans', 'HarmonyOS Sans SC', 'HarmonyOS Sans Net', 'HarmonyOS Sans SC Net'!important;}
+#design-list .design-item{display:inline-block; width:100px; border:1px solid #eee; list-style:none; margin: 0.8rem 0 0.1rem 0.8rem; border-radius: 5px;}
+#design-list .design-item .design-image-wrapper{width:100%; /*height:18.8rem;*/ text-align: center;}
+#design-list .design-image-wrapper img{width: 80px; height: 80px; margin-top: 10%;}
+#design-list .design-item .design-name{/*width:18.8rem;*/ height:3.6rem; line-height: 3.6rem; text-align:center; /*font-size:1.8rem; font-weight: 400;*/}
+#design-list .design-item.hidden{visibility: hidden;}
+/* #design-list .editable-text, #design-list .design-name .unit-name{font-size: 1.4rem;} */
+#design-list .editable-text:focus{padding: 1rem 1.5rem;}

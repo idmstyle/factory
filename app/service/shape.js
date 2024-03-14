@@ -28,7 +28,7 @@ class ShapeService {
 
         // 缺省限制每次最多获取100条数据。
         // 如果前端使用瀑布流/无限加载的方式来展现数据，limit需要大于一屏的数量
-        const limit = options.limit || 100;
+        const limit = options.limit || 100000;
         // 注意：sort中的字段必须在selector中包含
         const sort = limit > 1 ? options.sort || [{shape_text: 'asc'}] : null;
         
