@@ -46,12 +46,14 @@ const vm = new Vue({
         document.title = `${this.album.code} ${this.album.name} - 本地相册`;
 
         // 这里不能使用axios.get(XXXX).then的形式，VUE会报images未定义的错误
-        const imgResp = await axios.get(`/api/album-images?album_code=${this.album.code}&album_id=${ALBUM_ID}`);
+        // const imgResp = await axios.get(`/api/album-images?album_code=${this.album.code}&album_id=${ALBUM_ID}`);
+        
+        const imgResp = await axios.get('/storage/files/' + encodeURIComponent(this.album.path));
         const images = imgResp.data;
 
         for(let image of images) {
             if (image.url.startsWith('http') || image.url.startsWith('//')) continue;
-            image.url = this.baseURL + '/' + image.url
+            image.url = this.baseURL + image.url
         }
 
         this.images = images;

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="/factory/">
+        <title>数据管理</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            /* #app-header .menu-container li:hover,#app-header .menu-container li.hover{background-color: white;}
+            #app-header .menu-container li:hover a,#app-header .menu-container li.hover a{color: black;} */
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+            /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
+        </style>
+        <link rel="stylesheet" href="settings/database.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+            <el-container v-cloak style="height:100%;">
+                <el-header class="content-header" id="frame-header" height="40px" shadow="always">
+                    <el-col :span="14">
+                        <el-form :inline="true" size="mini" v-on:submit.native.prevent>
+                            <!-- <el-form-item>
+                                <el-input v-model="keyword" placeholder="">
+                                    <el-button slot="append" icon="el-icon-search" v-on:click="handleSearch"></el-button>
+                                </el-input>
+                            </el-form-item> -->
+                            <el-form-item>
+                                <el-button type="primary" :loading="isUnderDownloading" >全部</el-button>
+                                <!-- <el-button v-if="shapes.length == 0" :loading="isUnderDownloading" v-on:click="handleSync">同步</el-button> -->
+                            </el-form-item>
+                        </el-form>
+                        </el-col>
+                        <el-col :span="10"></el-col>
+                </el-header>
+                <el-main id="frame-main">
+                    <el-table :data="dbs" :default-sort = "{prop: 'code', order: 'descending'}" stripe style="width: 100%;" height="100%" row-key="code" :highlight-current-row="true" size="mini">
+                        <el-table-column prop="name" label="名称" width="120"></el-table-column>
+                        <el-table-column label="操作" align="center">
+                            <template slot-scope="scope">
+                                <el-button type="text" v-on:click="handleExportItem(scope.row)" size="mini">导出</el-button>
+                                <el-button type="text" v-on:click="handleImportItem(scope.row)" size="mini">导入</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-main>
+            </el-container>
+
+            <el-dialog v-cloak title="编辑形状" :visible.sync="editFormVisible" width="600px" :inline="true">
+                <el-form ref="edit-form" :model="current" label-width="100px" size="mini" label-position="right">
+                    <el-col :span="11">
+                        <el-form-item label="简码">
+                            <el-input v-model="current.id"></el-input>
+                        </el-form-item>
+                        <el-form-item label="名称">
+                            <el-input v-model="current.shape_text"></el-input>
+                        </el-form-item>
+                        <el-form-item label="宽">
+                            <el-input v-model="current.width">
+                                <template slot="append">px</template>
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="高">
+                            <el-input v-model="current.height">
+                                <template slot="append">px</template>
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="排序">
+                            <el-input v-model="current.sort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="类别">
+                            <el-input v-model="current.shape"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="2">&nbsp;</el-col>
+                    <el-col :span="11">
+                        <el-form-item label="行间距">
+                            <el-input v-model="current.row_span">
+                                <template slot="append">px</template>
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="列间距">
+                            <el-input v-model="current.col_span">
+                                <template slot="append">px</template>
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="最大行数">
+                            <el-input v-model="current.max_rows"></el-input>
+                        </el-form-item>
+                        <el-form-item label="最大列数">
+                            <el-input v-model="current.max_cols"></el-input>
+                        </el-form-item>
+                        <el-form-item label="二级目录">
+                            <el-input v-model="current.subpath"></el-input>
+                        </el-form-item>
+                        <el-form-item label="">
+                            &nbsp;
+                        </el-form-item>
+                    </el-col>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <!-- <el-input type="hidden" v-model="curTheme.id"></el-input> -->
+                    <el-button v-on:click="editFormVisible = false" size="mini">取 消</el-button>
+                    <el-button type="primary" v-on:click="handleUpdateItem" size="mini">确 定</el-button>
+                </div>
+            </el-dialog>
+        </div>
+        <div style="display: none; width: 0; height: 0; overflow: hidden;">
+            <input type="file" style="display: none;" id="file-selector"  accept="application/json" />
+        </div>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+        <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/FileSaver.js/2.0.5/FileSaver.min.js" type="application/javascript"></script>
+        <script type="text/javascript" src="common/index.js?v=0.01"></script>
+        <script type="text/javascript" src="app/service/album.js"></script>
+        <script src="settings/database.js?v=0.01"></script>
+	</body>
+</html>

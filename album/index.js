@@ -83,6 +83,13 @@ const vm = new Vue({
 		const vm = this;
 
 		const albums = await albumService.findAll({});
+		
+		for(let album of albums) {
+			if (!!album.cover_image) continue;
+			const localfile = `${album.path}\\01.png`;
+			album.cover_image = axios.defaults.baseURL + '/storage/local/' + encodeURIComponent(localfile);
+		}
+
 		this.albums = albums;
 
 		// const doc = {"id":"0084ee59237098ae2a5ac4c5cd0006f2","key":"0084ee59237098ae2a5ac4c5cd0006f2","value":{"rev":"1-95a3282a044081da46686ea1bc38a0d5"},"doc":{"_id":"0084ee59237098ae2a5ac4c5cd0006f2","_rev":"1-95a3282a044081da46686ea1bc38a0d5","created_at":"2023-06-19 08:51:53","updated_at":"2023-06-19 08:51:53","deleted_at":null,"code":"559","path":"/assets/images/5/5/9","name":"定制-lichunling79"}};

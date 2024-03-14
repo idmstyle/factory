@@ -51,10 +51,6 @@ class AlbumService {
             });
         });
 
-        console.log('alldocs:', this.db.allDocs());
-
-        console.log('result:', result);
-
         return result.docs;
     }
 
