@@ -1,77 +1,28 @@
 (async (window) => {
-const DB_TYPES = [
-    { name: '本地相册', service: new AlbumService() },
-    { name: '印花模板', service: new ShapeService() },
-];
-
-async function importDocs(service, docs) {
-    for(let doc of docs) {
-        // 导入数据时，包含_rev会导致Pouchdb判定版本冲突
-        delete doc._rev;
-
-        try {
-            // 存在旧的数据，直接覆盖
-            let exists = await service.findById(doc._id);
-            exists = Object.assign({}, exists, doc);
-            try {
-                await service.update(exists);
-                console.log('doc update success:', doc);
-            } catch (error) {
-                console.log('doc update failed:', error);
-            }
-        } catch (error) {
-            // 不存在对应的数据，pouchdb.get会抛出异常
-            try {
-                await service.create(doc);
-                console.log('doc create success:', doc);
-            } catch (error) {
-                console.log('doc create failed::', error);
-            }
-        }
-    }
-
-    return true;
-}
-
+const shapeService = new ShapeService();
 const vm = new Vue({
     el: '#app',
     delimiters: ['<{', '}>'],
     data: {
-        dbs: DB_TYPES,
+        shapes: [],
         isUnderDownloading: false,
         editFormVisible: false,
         current: {code: '', path: ''},
         keyword: '',
     },
-    mounted: async function() {},
+    mounted: async function() {
+        const vm = this;
+        
+        const shapes = await shapeService.findAll({});
+        console.log('shapes:', shapes);
+        this.shapes = shapes;
+    },
     methods: {
-        handleImportItem: async function (item) {
-            const selector = document.getElementById('file-selector');
-
-            async function fileSelectorChange(event) {
-                const files = selector.files;
-                if (files.length == 0) return ;
-
-                const file = files[0];
-                const docs = await fetch(URL.createObjectURL(file)).then( function (response) {
-                    return response.json();
-                });
-                
-                await importDocs(item.service, docs);
-                vm.$message({message: '数据导入成功', type: 'success'});
-
-            }
-            selector.addEventListener('change', fileSelectorChange, { once: true });
-
-            selector.click();
-        },
-        handleExportItem: async function (item) {
-            const service = item.service;
-            const all = await service.findAll({});
-            const filename = item.name + '.json';
-            const data = JSON.stringify(all).trim("'");
-            const file = new File([data], filename, {type: "application/json"});
-            saveAs(file);
+        handleNewItem: function () {
+            this.$message({message: '功能开发中', type: 'info'});
+            return ;
+            this.current = {id: '', shape: '', shape_text: ''};
+            this.editFormVisible = true;
         },
         handleSync: async function () {
             if (this.shapes.length != 0) return ;
@@ -130,5 +81,4 @@ const vm = new Vue({
         }
     }
 });
-
 })(window);
