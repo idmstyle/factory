@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="../">
+        <title>生成效果图</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="static/css/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            /* #app-header .menu-container li:hover,#app-header .menu-container li.hover{background-color: white;}
+            #app-header .menu-container li:hover a,#app-header .menu-container li.hover a{color: black;} */
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+            /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
+        </style>
+        <link rel="stylesheet" href="rendering/creator.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+            <el-container v-cloak>
+                <el-aside width="270px" style="/*margin-left: 12px;*/" id="options-container">
+                    <el-container>
+                        <el-header height="220" id="source-container">
+                            <div class="container-item-header">
+                                <div class="container-item-title" style="width: 100px;">设置</div>
+                                <div class="item-header-form" style="flex-grow: 1;"></div>
+                            </div>
+                            <div class="container-item-main" style="padding: 10px;">
+                                <el-form size="mini" :inline="false" label-width="60px">
+                                    <el-form-item label="选择主题">
+                                        <el-select
+                                            v-model="srcTheme"
+                                            filterable
+                                            remote
+                                            default-first-option
+                                            reserve-keyword
+                                            value-key='id'
+                                            placeholder="使用编号或名称查询"
+                                            :remote-method="srcThemeQuery"
+                                            :loading="srcThemeQueryLoading">
+                                            <el-option
+                                                v-for="theme in srcThemes"
+                                                :key="theme.id"
+                                                :label="theme.code + ' ' + theme.name"
+                                                :value="theme">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="合成模式">
+                                        <el-radio-group v-model="options.composeModel" v-on:change="handleComposeModelChange">
+                                            <el-radio :label="0">精简</el-radio>
+                                            <el-radio :label="1">完整</el-radio>
+                                        </el-radio-group>
+                                    </el-form-item>
+                                    <el-form-item label="图片尺寸">
+                                        <el-radio-group v-model="options.imageSize">
+                                            <el-radio label="8x">8x</el-radio>
+                                            <el-radio label="10x">10x</el-radio>
+                                        </el-radio-group>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                        </el-header>
+                        <!-- {-- 支持选择本地原图的模块代码，功能已暂时关闭，代码需要保留 --} -->
+                        <!--{-- <el-main style="padding: 0; background: white;">
+                            <div class="container-item-header">
+                                <div class="container-item-title">相册</div>
+                                <input type="file"
+                                    id="sourceFileSelector"
+                                    ref="sourceFileSelector"
+                                    multiple accept="image/*"
+                                    class="visually-hidden"
+                                    v-on:change="handleSourceChange()"
+                                    style="display: none;"/>
+                                <label for="sourceFileSelector" class="text-button el-button el-button--text el-button--small">本地</label>
+                                <el-button class="text-button " type="text" size="small" @click="handleShowImageSelector">相册</el-button>
+                                <el-button class="text-button " type="text" size="small" @click="handleSourceClear">清空</el-button>
+                            </div>
+                            <div class="container-item-main" v-loading.lock="sourceLoading">
+                                <ul class="source-image-list">
+                                    <li v-for="(image,index) in sources" class="source-image-item">
+                                        <el-image class="source-image"
+                                            :src="image.url" :id="'source-' + image.code" 
+                                            :preview-src-list="sourceImageUrls"
+                                            v-on:load="handleSourceLoad($event, image, index)">
+                                        </el-image>
+                                    </li>
+                                </ul>
+                            </div>
+                        </el-main> --}-->
+                        <el-main id="theme-image-container" style="padding: 0; background: white;display:flex;flex-direction: column;">
+                            <div class="container-item-header">
+                                <div class="container-item-title">相册</div>
+                                <!-- <el-select v-model="diaSourceCategory" size="mini" placeholder="按形状筛选" style="width:100px; margin-right:20px;">
+                                    <el-option key="全部类型" label="全部类型" :value="null"></el-option>
+                                    <el-option key="圆形" label="圆形" value="圆形"></el-option>
+                                    <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
+                                    <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
+                                </el-select> -->
+                                <template v-if="!!srcTheme">
+                                    <!-- <el-dropdown v-on:command="handleSourceCategoryCommand" size="mini" style="margin-right:15px;">
+                                        <span class="el-dropdown-link">
+                                            <{diaSourceCategory ? diaSourceCategory : '全部形状'}><i class="el-icon-arrow-down el-icon--right"></i>
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item :command="null">全部形状</el-dropdown-item>
+                                            <el-dropdown-item command="圆形">圆形</el-dropdown-item>
+                                            <el-dropdown-item command="20x20心">20x20心</el-dropdown-item>
+                                            <el-dropdown-item command="18x25方">18x25方</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown> -->
+                                    <el-button class="text-button " type="text" size="small" v-on:click="srcSourceSelectAll">全选</el-button>
+                                    <el-button class="text-button " type="text" size="small" v-on:click="srcSourceClearAll">全不选</el-button>
+                                </template>
+                            </div>
+                            <div class="container-item-main" style="overflow-y:hidden;">
+                                <iframe id="album-image-iframe" v-if="!!albumId" :src="'album-image/index.html?zoom=0.55&albumId=' + albumId" style="width:100%; height: 100%; overflow: hidden; border: none; padding: 0; margin: 0;"></iframe>
+                                <!-- <ul id="theme-image-list" v-if="selectorImages.length>0" style="height:100%; overflow-y:auto;">
+                                    <template v-for="(image,index) of selectorImages">
+                                        <li
+                                            :title="image.basename"
+                                            class="design-item"
+                                            :class="{ active: image.isActive }"
+                                            v-on:click="srcImageSelect(index, image)"
+                                            style="cursor:pointer;">
+                                            <p class="design-image-wrapper"><img :src="image.url" :alt="image.basename" :id="'source-' + image.basename" /></p>
+                                            <p class="design-name">
+                                                <span contenteditable="false" class="editable-text"><{image.basename}></span>
+                                            </p>
+                                        </li>
+                                        <li class="design-item hidden" v-else>
+                                            <p class="design-image-wrapper"><img src="" /></p>
+                                            <p class="design-name"></p>
+                                        </li>
+                                    </template>
+                                </ul>
+                                <el-empty class="design-list-empty" v-else description=" " image-size="60"></el-empty> -->
+                            </div>
+                        </el-main>
+                    </el-container>
+                    
+                    
+                </el-aside>
+                <el-container>
+                    <el-aside width="530px" style="margin-left: 10px;" id="tpl-container">
+                        <div class="container-item-header">
+                            <div class="container-item-title" style="width: 80px;">模版</div>
+                            <div style="flex-grow: 1;"></div>
+                            <el-dropdown v-on:command="handleTemplateCategoryCommand" size="mini">
+                                <span class="el-dropdown-link">
+                                    <{tplCategoryName ? tplCategoryName : '分类'}><i class="el-icon-arrow-down el-icon--right"></i>
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item key="项链" label="项链" command="项链">项链</el-dropdown-item>
+                                    <el-dropdown-item key="戒指" label="戒指" command="戒指">戒指</el-dropdown-item>
+                                    <el-dropdown-item key="耳饰" label="耳饰" command="耳饰">耳饰</el-dropdown-item>
+                                    <el-dropdown-item key="钥匙链" label="钥匙链" command="钥匙链">钥匙链</el-dropdown-item>
+                                    <el-dropdown-item key="胸针" label="胸针" command="胸针">胸针</el-dropdown-item>
+                                    <el-dropdown-item key="夹片手链" label="夹片手链" command="夹片手链">夹片手链</el-dropdown-item>
+                                    <el-dropdown-item key="合金手镯" label="合金手镯" command="合金手镯">合金手镯</el-dropdown-item>
+                                    <el-dropdown-item key="牛皮手链" label="牛皮手链" command="牛皮手链">牛皮手链</el-dropdown-item>
+                                    <el-dropdown-item key="绒绳手链" label="" command="绒绳手链">绒绳手链</el-dropdown-item>
+                                    <el-dropdown-item key="弹力绳手链" label="" command="弹力绳手链">弹力绳手链</el-dropdown-item>
+                                    <el-dropdown-item key="金刚结手链" label="" command="金刚结手链">金刚结手链</el-dropdown-item>
+                                    <el-dropdown-item key="绑绳手链" label="" command="绑绳手链">绑绳手链</el-dropdown-item>
+                                    <el-dropdown-item key="袖扣" label="" command="袖扣">袖扣</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                            <template v-if="tplSuits.length>0">
+                                <el-button class="text-button" type="text" size="small" v-on:click="handleTemplateSelectAll" style="margin-left:15px;">全选</el-button>
+                                <el-button class="text-button" type="text" size="small" v-on:click="handleTemplateClearAll">全不选</el-button>
+                            </template>
+                        </div>
+                        <div class="container-item-main">
+                            <el-table :data="tplSuits"
+                                ref="tplSuitsTable"
+                                style="width: 100%;"
+                                row-key="_id"
+                                current-row-key="1"
+                                :highlight-current-row="false"
+                                :show-header="false"
+                                v-on:selection-change="handleSelectionChange">
+                                <el-table-column
+                                    fixed
+                                    type="selection"
+                                    :reserve-selection="true"
+                                    width="30"
+                                    align="center"
+                                    :selectable="isRowSelectable">
+                                </el-table-column>
+                                <el-table-column fixed prop="code" label="编号" width="42" align="center">
+                                    <template slot-scope="scope">
+                                        <span><{scope.row.code}></span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="name" label="模版名称" width="185"></el-table-column>
+                                <el-table-column label="图片">
+                                    <template slot-scope="scope">
+                                        <div class="tpl-image-list">
+                                            <div
+                                                v-for="(tpl, index) in scope.row.images"
+                                                class="tpl-image-item"
+                                                style="margin:0; padding:0; border:none;">
+                                                <template v-if="tpl.background">
+                                                    <el-image
+                                                        :id="'background-'+scope.row.code+'-'+tpl.name"
+                                                        :data-id="scope.row._id"
+                                                        class="tpl-image" 
+                                                        :src="tpl.background"
+                                                        :preview-src-list="[tpl.background]"
+                                                        v-on:load="handleBackgroundImageLoad($event, tpl)"
+                                                        :title="tpl.name"
+                                                        style="margin:0 2px;">
+                                                    </el-image>
+                                                </template>
+                                                <template v-if="tpl.watermark">
+                                                    <el-image
+                                                        :id="'watermark-'+scope.row.code+'-'+tpl.name"
+                                                        :data-id="scope.row._id"
+                                                        class="tpl-mark"
+                                                        :src="tpl.watermark"
+                                                        v-on:load="handleTplMarkLoad($event, tpl)">
+                                                    </el-image>
+                                                </template>
+                                                <template v-if="tpl.foreground">
+                                                    <el-image
+                                                        :id="'foreground-'+scope.row.code+'-'+tpl.name"
+                                                        :data-id="scope.row._id"
+                                                        class="tpl-image"
+                                                        :src="tpl.foreground"
+                                                        :preview-src-list="[tpl.foreground]"
+                                                        v-on:load="handleForegroundImageLoad($event, tpl)"
+                                                        :title="tpl.name"
+                                                        style="margin:0 2px;">
+                                                    </el-image>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                        
+                        
+                    </el-aside>
+                    <el-main class="content-main" id="preview-container">
+                        <div class="container-item" style="display: flex;">
+                            <div class="container-item-header">
+                                <div class="container-item-title" style="width: 100px;">预览</div>
+                                <el-button
+                                    type="text"
+                                    size="small"
+                                    class="text-button"
+                                    v-on:click="imageExportHandle">下载</el-button>
+                            </div>
+                            <div class="container-item-main" v-loading.lock="previewLoading">
+                                <canvas id="canvas" style="display: none;" width="1000" height="1000"></canvas>
+                                <canvas id="canvas-8x" style="display: none;" width="800" height="800"></canvas>
+                                <canvas id="canvas-10x" style="display: none;" width="1000" height="1000"></canvas>
+                                <ul class="preview-image-list" v-cloak>
+                                    <li
+                                        v-for="(preview,index) in previews"
+                                        class="preview-image-item"
+                                        :class="{active: preview.isActive}"
+                                        v-on:click="handlePreviewItemClick(preview, index)">
+                                        <div>
+                                            <el-image
+                                                :src="preview.src"
+                                                id="'preview' + preview.code"
+                                                :data-title="options.themeCode+preview.title"
+                                                class="preview-image"
+                                                v-on:load="handlePreviewImageLoad"
+                                                :preview-src-list="previewImageUrls"></el-image>
+                                        </div>
+                                        <el-row style="margin-bottom: 5px;">
+                                            <el-col :span="24" style="text-align: center;">
+                                                <span style="padding:0 5px; font-size: 12px;">
+                                                    <{options.themeCode}><{preview.title}>
+                                                </span>
+                                            </el-col>
+                                        </el-row>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        
+                    </el-main>
+                </el-container>
+            </el-container>
+            <el-dialog
+            id="source-selector-dialog"
+            title="选择图片"
+            :visible.sync="selectorDialogVisible"
+            custom-class="image-selector-dialog"
+            v-on:opened="handleSelectorDialogOpened"
+            width="70%"
+            :lock-scroll="true"
+            v-cloak>
+            <div slot="title">
+                <el-form size="mini" :inline="true">
+                    <!-- 后期如果提供更多操作选项，可以使用 select 代替 radio group 以节省空间 -->
+                    <!--<el-form-item label="图片类型">
+                        <el-select v-model="diaSourceCategory" size="mini" placeholder="按形状筛选" style="width:100px;">
+                            <el-option key="全部类型" label="全部类型" :value="null"></el-option>
+                            <el-option key="圆形" label="圆形" value="圆形"></el-option>
+                            <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
+                            <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
+                        </el-select>
+                    </el-form-item> -->
+                    <el-form-item label="图片类型">
+                        <el-radio-group v-model="diaSourceCategory">
+                            <el-radio :label="null">全部</el-radio>
+                            <el-radio label="圆形">圆形</el-radio>
+                            <el-radio label="20x20心">20x20心</el-radio>
+                            <el-radio label="18x25方">18x25方</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div style="max-height:300px; overflow-y:auto;">
+                <ul id="design-list" v-if="selectorImages.length>0">
+                    <template v-for="(image,index) of selectorImages">
+                        <li
+                            class="design-item" :class="{ active: image.isActive }" v-on:click="handleImageSelect(index, image)" style="cursor:pointer;">
+                            <p class="design-image-wrapper"><img :src="image.url" :alt="image.basename"/></p>
+                            <p class="design-name">
+                                <span contenteditable="false" class="editable-text"><{image.basename}></span>
+                            </p>
+                        </li>
+                        <li class="design-item hidden" v-else>
+                            <p class="design-image-wrapper"><img src="" /></p>
+                            <p class="design-name"></p>
+                        </li>
+                    </template>
+                </ul>
+                <el-empty class="design-list-empty" v-else description="图片库空空如也"></el-empty>
+            </div>
+            <div slot="footer" class="dialog-footer">
+                <el-button v-on:click="selectorDialogVisible = false" size="mini">取 消</el-button>        
+                <el-button v-on:click="handleSelectorConfirm" size="mini">确 定</el-button>
+                <el-button v-on:click="handleSelectorClearAll" size="mini">全不选</el-button>
+                <el-button type="primary" v-on:click="handleSelectorConfirmAll" size="mini">全选 & 确定</el-button>
+            </div>
+        </el-dialog>
+        
+        
+        </div>
+
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/clipboard.js/2.0.10/clipboard.min.js" type="application/javascript"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/clipboard-polyfill/4.0.0-rc1/main/clipboard-polyfill.min.js" type="application/javascript"></script>
+        <script type="text/javascript" src="static/js/index.js?v=0.01"></script>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/FileSaver.js/2.0.5/FileSaver.min.js" type="application/javascript"></script>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/html-to-image/1.9.0/html-to-image.min.js" type="application/javascript"></script>
+        
+        <script type="text/javascript" src="rendering/creator-source-mixin.js?v=1.0.15"></script>
+        <script type="text/javascript" src="rendering/creator-template-mixin.js?v=1.0.15"></script>
+        <script type="text/javascript" src="rendering/creator-func.js?v=1.0.15"></script>
+        <script type="text/javascript" src="rendering/creator-preview-mixin.js?v=1.0.15"></script>
+        <script type="text/javascript" src="rendering/creator-dialog-mixin.js?v=1.0.15"></script>
+        <script src="rendering/creator.js?v=0.01"></script>
+	</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="../">
+        <title>我的相册</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            /* #app-header .menu-container li:hover,#app-header .menu-container li.hover{background-color: white;}
+            #app-header .menu-container li:hover a,#app-header .menu-container li.hover a{color: black;} */
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+            /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
+        </style>
+        <link rel="stylesheet" href="album/index.css">
+	</head>
+	<body>
+        <div id="app" v-cloak v-loading="isLoading">
+            <el-container v-cloak style="height:100%;">
+                <el-aside width="270px" style="background-color:white;">
+                    <el-container>
+                        <el-header height="39px" style="border-bottom:1px solid #eee; display: flex; flex-direction: row;">
+                            <div style="line-height: 39px;font-size: 14px; flex-grow: 1;">我的相册</div>
+                            <div style="width: 20px; line-height: 39px;">
+                                <i v-on:click="handleShowNewAlbumDialog" class="el-icon el-icon-plus" style="font-size: 16px; cursor: pointer;"></i>
+                            </div>
+                        </el-header>
+                        <el-main style="padding:10px 10px 10px 10px; ">
+                            <el-form size="mini" v-on:submit.native.prevent label-width="68px" label-position="right">
+                                <el-form-item label="短代码">
+                                    <el-input v-model="params.id" placeholder="相册ID"></el-input>
+                                </el-form-item>
+                                <el-form-item label="名称">
+                                    <el-input v-model="params.name" placeholder="相册名称或者标题"></el-input>
+                                </el-form-item>
+                                <el-form-item label="关联客户">
+                                    <el-input v-model="params.owner" placeholder="客户名称或代码"></el-input>
+                                </el-form-item>
+                                <el-form-item label="描述">
+                                    <el-input v-model="params.description" placeholder="描述"></el-input>
+                                </el-form-item>
+                                <el-form-item label=" ">
+                                    <el-button plain v-on:click="handleSearch">搜索</el-button>
+                                    <el-button v-on:click="handleResetSearchParams">清空</el-button>
+                                </el-from-item>
+                            </el-form>
+                        </el-main>
+                    </el-container>
+                </el-aside>
+                <el-container style="margin-left:10px;">
+                    <el-header class="content-header" id="frame-header" height="40px" shadow="always">
+                        <el-col :span="14">
+                            <el-form :inline="true" size="mini" v-on:submit.native.prevent>
+                                <!-- <el-form-item>
+                                    <el-button plain v-on:click="handleShowNewAlbumDialog" style="width:100%">新建</el-button>
+                                </el-form-item> -->
+                                <el-form-item>
+                                    <el-pagination small layout="prev, next" :current-page.sync="currentPage" v-on:current-change="handleCurrentPageChange" :total="100" :page-count="pageCount" :disabled="isPaginationDisabled">
+                                    </el-pagination>
+                                </el-form-item>
+                                <el-form-item>
+                                    <span style="color:black;">第 <{currentPage}> 页</span>
+                                </el-form-item>
+                            </el-form>
+                            </el-col>
+                            <el-col :span="10"></el-col>
+                    </el-header>
+                    <el-main id="frame-main" :class="{loading: isAlbumLoading}" v-cloak>
+                        <!-- infinite-scroll 的父级元素的display不能是flex或者float，否则滚动事件无效 -->
+                        <div style="width:100%;display: block; background: rgb(244, 244, 245);" infinite-scroll-distance="40px" :infinite-scroll-disabled="isInfiniteScrollDisabled">
+                            <el-card
+                                v-for="(album, index) of albums"
+                                style="display:inline-block; width:180px; height:220px; margin-right:10px; margin-top:10px;"
+                                :body-style="{padding: '10px'}">
+                                <div style="width: 160px; height: 160px;">
+                                    <a :href="'album/detail.html?id=' + album._id" target="_blank"> <!-- v-on:click.prevent="handleShowAlbumDetail(album)"-->
+                                        <!-- 如果是不存在cover_image，则自动加载名为01.png的图片作为封面 -->
+                                        <!-- <el-image :src="'dms://localhost/storage/album/' + album._id + '/01.png'" fit="fill" style="width:100%; height:100%;" lazy  crossorigin="anonymous"></el-image> -->
+                                        <el-image :src="album.cover_image" fit="fill" style="width:100%; height:100%;" lazy  crossorigin="anonymous">
+                                            <div slot="placeholder" class="image-slot">
+                                                加载中<span class="dot">...</span>
+                                            </div>
+                                        </el-image>
+                                    </a>
+                                </div>
+                                <div style="line-height:24px; padding-top:5px;">
+                                    <div style="display:flex; height:24px; overflow-y:hidden;">
+                                        <div style="flex-grow:1;"><{album.name}></div>
+                                        <div style="text-align:right;"><{album._id}></div>
+                                    </div>
+                                    <div style="display:flex;">
+                                        <div v-if="album.updated_at"><{album.updated_at.substr(0, 10)}></div>
+                                        <div v-else>1970-01-01</div>
+                                        <div style="flex-grow:1; color:#999; text-align:right;">本地</div>
+                                    </div>
+                                </div>
+                            </el-card>
+                            <div style="width:100%; height:10px;"></div>
+                        </div>
+                    </el-main>
+                </el-container>
+            </el-container>
+            
+            <el-dialog v-cloak title="新建相册" :visible.sync="editFormVisible" width="680px">
+                <el-form ref="edit-form" :model="current" label-width="90px" size="mini">
+                    <el-col :span="11">
+                        <el-form-item label="短代码">
+                            <el-input v-model="current._id" placeholder="必填项"></el-input>
+                        </el-form-item>
+                        <el-form-item label="相册名称">
+                            <el-input v-model="current.name" placeholder="必填项"></el-input>
+                        </el-form-item>
+                        <el-form-item label="关联客户">
+                            <el-input v-model="current.owner" placeholder="非必填项"></el-input>
+                        </el-form-item>
+                        <el-form-item label="客户公司">
+                            <el-input v-model="current.owner_company" placeholder="非必填项"></el-input>
+                        </el-form-item>
+                        <el-form-item label="关联账号">
+                            <el-input v-model="current.associated_account" placeholder="非必填项"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="2">&nbsp;</el-col>
+                    <el-col :span="11">
+                        <el-form-item label="文件夹">
+                            <el-input v-model="current.path" placeholder="点击右侧按钮选择文件夹" :readonly="true">
+                                <i 
+                                    slot="suffix"
+                                    title="选择文件夹"
+                                    class="el-icon-folder-opened el-input__icon"
+                                    v-on:click="handleSelectDirectory"
+                                    style="cursor: pointer;">
+                                </i>
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="描述">
+                            <el-input type="textarea" v-model="current.description" placeholder="非必填项"></el-input>
+                        </el-form-item>
+                        <el-form-item label="参考图片">
+                            <el-input type="textarea" v-model="current.images" placeholder="非必填项"></el-input>
+                        </el-form-item>
+                        <el-form-item label="Git仓库地址">
+                            <el-input type="textarea" v-model="current.git" placeholder="非必填项"></el-input>
+                        </el-form-item>
+                        <el-form-item label="">
+                            
+                        </el-form-item>
+                    </el-col>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button v-on:click="editFormVisible = false" size="mini">取 消</el-button>
+                    <el-button type="primary" v-on:click="hanleSaveNewAlbum" size="mini">确 定</el-button>
+                </div>
+            </el-dialog>
+        </div>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+        <script type="text/javascript" src="static/js/index.js?v=0.01"></script>
+        <script type="text/javascript" src="album/index.js?v=0.01"></script>
+	</body>
+</html>

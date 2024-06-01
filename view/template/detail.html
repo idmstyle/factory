@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="../">
+        <title>印花模板</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+        </style>
+        <link rel="stylesheet" href="template/index.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+<el-container>
+    <el-aside width="280px" style="height:100%; background-color:white;">
+        <div style="height:35px; line-height:35px; border-bottom:1px solid #eee; font-size:14px; padding:0 10px; color:#606266;">模板详情</div>
+        <el-form size="mini" label-width="64px" style="margin:10px;">
+            <el-form-item label="短代码">
+                <el-input name="_id" v-model="tpl._id"></el-input>
+            </el-form-item>
+            <el-form-item label="名称">
+                <el-input type="textarea" v-model="tpl.name" autosize></el-input>
+            </el-form-item>
+        </el-form>
+    </el-aside>
+    <el-main class="content-main">
+        <el-container>
+            <el-main style="padding:0; margin:0 10px; background-color:white;">
+                <el-table :data="shapes" row-key="id" stripe size="mini" height="100%">
+                    <el-table-column type="index" label="序号" align="center"></el-table-column>
+                    <el-table-column prop="shape_tpl_id" label="形状" width="120" header-align="center" align="center">
+                        <template slot-scope="scope">
+                            <el-select v-model="scope.row.shape_tpl_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
+                                <el-option v-for="item in preshapes" :key="item._id" :label="item.shape_text" :value="item._id"></el-option>
+                            </el-select>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="width" label="宽" align="center" width="80"></el-table-column>
+                    <el-table-column prop="height" label="高" align="center" width="80"></el-table-column>
+                    <el-table-column label="操作" align="center">
+                        <template slot-scope="scope">
+                            <el-button size="mini" plain type="warning" v-on:click="handleRemoveShape(scope.$index, scope.row)">删除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-main>
+            <el-aside width="640px">
+                <el-table>
+                    <!-- 此功能区用于编辑模版贴图数据 -->
+                </el-table>
+            </el-aside>
+        </el-container>
+        
+    </el-main>
+</el-container>
+</div>
+<script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+<script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+<script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+<script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+<script type="text/javascript" src="common/index.js?v=0.01"></script>
+<script type="text/javascript" src="app/service/shape.js"></script>
+<script type="text/javascript" src="app/service/template.js"></script>
+<script type="text/javascript" src="app/service/template-shape.js"></script>
+<script src="template/detail.js?v=0.01"></script>
+</body>
+</html>

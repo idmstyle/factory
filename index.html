@@ -4,65 +4,85 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
-        <base href="/factory/">
-        <title>dmstyle</title>
-		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
-        <link href="favicon.ico" rel="icon"/>
+        <base target="root" />
+        <title>新建标签页</title>
+		<link href="view/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="view/favicon.ico" rel="icon"/>
         <style type="text/css">
             *{padding: 0; margin: 0; font-size: 12px;}
             html{zoom:1;}
             html,body,#app{width: 100%; height: 100%; overflow: hidden;}
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            [v-cloak]{display:none; background-image:url( 'view/static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
-            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header{padding:0 10px; height: 20px; min-height:20px; overflow: hidden; /*background-color: #363636;*/background-color: white; color: #999; display: flex; border-bottom: 1px solid #eee;}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
             #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
             #app-header .menu-container ul{white-space: nowrap;}
             #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
             #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
-            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            #app-header .menu-container li a{color: #999; color:black; line-height: 20px; text-decoration: none;font-size: 10px;}
             #app-header .menu-container li:hover{background-color: white;}
             #app-header .menu-container li:hover a{color: black;}
             #app-content{flex-grow: 1; overflow: hidden;}
+            #tab-panel-list, #tab-panel-list .tab-panel{width: 100%; height: 100%; overflow: hidden;}
+            #app-content .tab-panel{display: none;}
+            #app-content .tab-panel.current{display:block;}
+            #app-content .tab-panel iframe,#app-content .tab-panel-view{width:100%; height:100%; border: none;padding:0; margin:0;overflow: hidden;}
+
+            #tabs-container {width: calc( 100% - 135px); overflow: hidden; height:32px; display: flex; background-color: #efefef;}
+            #tabs-container ul{white-space: nowrap;}
+            #tabs-container ul, #tabs-container li{padding: 0; margin: 0; height: 100%; user-select: none;}
+            #tabs-container li{
+                list-style: none;
+                display: inline-block;
+                padding: 0 10px;
+                border-radius: 6px 6px 0 0;
+                letter-spacing: 1px;
+                line-height: 32px;
+            }
+            #tabs-container li .tab-title{cursor:pointer; color: #999; color:black; line-height: 32px; text-decoration: none; }
+            #tabs-container li:hover, #tabs-container li.current{background-color: white;}
+            #tabs-container li:hover .tab-title, #tabs-container li.current .tab-title{color: black;}
+            #tabs-container .close-btn{visibility: hidden; cursor:pointer; padding:0 0 0 5px; margin-left: 5px;}
+            #tabs-container .tab-item.current .close-btn,#tabs-container .tab-item:hover .close-btn{visibility: visible;}
         </style>
-        <link rel="stylesheet" href="common/index.css?v=0.01"/>
 	</head>
 	<body>
-        <div id="app" v-cloak>
-            <div id="app-header">
+        <div id="app" v-cloak style="background-color: #efefef;">
+            <div id="app-header" style="flex-direction: column;">
                 <div class="menu-container">
                     <ul>
-                        <li>
-                            <a nofollow href="?_path_=composition/index.html" tabIndex="-1">快捷制版</a>
+                        <li class="favorite-item">
+                            <a nofollow href="index.html?_path_=view/composition/index.html" target="_blank">手动制版</a>
                         </li>
                         <li>
-                            <a nofollow href="?_path_=sku/detail.html" tabIndex="-1">货号管理</a>
+                            <a nofollow href="index.html?_path_=view/sku/detail.html" target="_blank">货号管理</a>
                         </li>
                         <li>
-                            <a nofollow href="?_path_=album/index.html" tabIndex="-1">本地相册</a>
+                            <a nofollow href="index.html?_path_=view/album/index.html" target="_blank">我的相册</a>
                         </li>
                         <li>
-                            <a nofollow href="?_path_=template/index.html" tabIndex="-1">产品模板</a>
+                            <a nofollow href="index.html?_path_=view/template/index.html" target="_blank">产品模板</a>
                         </li>
                         <li>
-                            <a nofollow href="?_path_=shape/index.html" tabIndex="-1">形状管理</a>
+                            <a nofollow href="index.html?_path_=view/shape/index.html" target="_blank">形状管理</a>
                         </li>
                         <li>
-                            <a nofollow href="?_path_=rendering/creator.html" tabIndex="-1">生成效果图</a>
+                            <a nofollow href="index.html?_path_=view/rendering/creator.html" target="_blank">生成效果图</a>
                         </li>
                         <li>
-                            <a nofollow href="?_path_=rendering/album.html" tabIndex="-1">效果图相册</a>
+                            <a nofollow href="index.html?_path_=view/rendering/album.html" target="_blank">效果图相册</a>
+                        </li>
+                        <li>
+                            <a nofollow href="index.html?_path_=view/settings/database.html" target="_blank">数据管理</a>
                         </li>
                     </ul>
                 </div>
-                <div class="userinfo-container">
-                    <el-icon class="el-icon-user-solid"></el-icon>
-                    <span style="margin-left:5px;">NextOS</span>
-                </div>
+                <div class="userinfo-container"></div>
             </div>
             <div id="app-content" class="content-main">
-                <iframe id="topframe-main" src="" style="width:100%; height:100%; border: none;padding:0; margin:0;overflow: hidden;"></iframe>
+                <iframe id="topframe-main" src="about:blank" style="width:100%; height:100%; border: none;padding:0; margin:0;overflow: hidden;" onload="updateDocumentTitle()"></iframe>
             </div>
         </div>
         <script type="text/javascript">
@@ -77,19 +97,11 @@
                 const url = `${path}?${params.toString()}`;
                 // iframe重定向
                 if (url) document.getElementById('topframe-main').setAttribute('src', url);
-            } else {
-                const url = 'home.html';
-                if (url) document.getElementById('topframe-main').setAttribute('src', url);
             }
-
-            document.getElementById('topframe-main').addEventListener('load', function () {
-                const title = event.target.contentWindow.document.title;
-                updateDocumentTitle(title);
-            });
 
             function updateDocumentTitle(title = '') {
                 if (!title) title = event.target.contentWindow.document.title;
-                document.title = title + ' - dmstyle';
+                document.title = title;
             }
         </script>
 	</body>

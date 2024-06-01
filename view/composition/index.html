@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="../">
+        <title>快捷制版</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+        </style>
+        <link rel="stylesheet" href="composition/index.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+<el-container style="width:100%; height:100%; overflow:hidden;">
+    <el-aside width="290px" style="height:100%; overflow:hidden; background-color:white; display:flex; flex-direction:column;" v-cloak>
+        <div style="height:190px;" v-cloak>
+            <div style="height:35px; border-bottom:1px solid #eee; font-size:14px; color:#606266; line-height:35px; padding:0 10px;">基础功能</div>
+            <!-- 修改表单size时，切记在windows下做个测试，宽度表现在windows和mac之间存在区别 -->
+            <el-form size="mini" label-width="45px" style="padding:10px;">
+                <el-form-item label="批次">
+                    <el-select v-model="batchId" ref="batchSelect" placeholder="请选择" size="mini" v-on:change="handleBatchIdChange" tabIndex="-1" style="width:155px;">
+                        <el-option v-for="(item,index) in batchList" :key="item.id" :label="item.id" :value="item.id" tabIndex="-1" style="padding:0 5px;">
+                            <span style="float:left"><{ item.id }></span>
+                            <span class="batch-list-delete-button" style="float:right; color: #8492a6; font-size: 12px; padding:0 5px;" v-on:click.stop="handleDeleteBatch(item, index)">
+                                <i class="el-icon-close"></i>
+                            </span>
+                        </el-option>
+                    </el-select>
+                    <el-button tabIndex="-1" v-on:click="handleCreateBatch">新建</el-button>
+                </el-form-item>
+                <el-form-item label="货号">
+                    <el-input v-model="skuId" ref="skuIdInput" v-on:keyup.enter.native="handleSubmit" style="width:155px;" placeholder="例：20000101"></el-input>
+                    <el-button v-on:click="handleShapesSearch" tabIndex="-1">查询</el-button>
+                </el-form-item>
+                <el-form-item label="数量">
+                    <el-input-number v-model="quantity" ref="quantityInput" :min="1" v-on:keyup.enter.native="handleSubmit" v-on:keydown.tab.native.stop="handleQuantityInputTab($event)"  style="width:155px;"></el-input-number>
+                    <el-button type="primary" v-on:click="handleSubmit" tabIndex="-1" :disabled="shapes.length<=0">插入</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <div style="flex-grow:1;">
+            <el-table id="sku-shapes-table" :data="shapes" size="mini" style="width:100%;" height="100%">
+                <el-table-column prop="image_url" label="图片" width="60px" align="center">
+                    <template slot-scope="scope">
+                        <el-image shape="square" fit="contain" :src="scope.row.image_url" style="width:40px; height:40px;">
+                            <div slot="error" class="image-slot">
+                                <i class="el-icon-picture-outline"></i>
+                            </div>
+                        </el-image>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="shape_text" label="尺寸" align="center">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.shape_tpl_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
+                            <el-option v-for="item in preshapes" :key="item._id" :label="item.shape_text" :value="item._id"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="width" label="数量" width="50px" align="center">
+                    <template slot-scope="scope"><{insertItem.quantity}></template>
+                </el-table-column>
+                <el-table-column prop="width" label="操作" width="50px" align="center">
+                    <template slot-scope="scope">
+                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuId)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">编辑</a>
+                    </template>
+                </el-table-column>
+                <template slot="empty">
+                    <div v-if="isAutoCreateVisible">
+                        <span>暂无数据，请</span>
+                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuId)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">手动编辑</a>
+                    </div>
+                    <div v-else>暂无数据</div>
+                </template>
+            </el-table>
+        </div>
+    </el-aside>
+    <el-main style="padding:0;">
+        <el-container>
+            <el-main id="page-container" class="card">
+                <div class="header clearfix" style="display:flex;">
+                    <div class="title" style="width:200px;">预览</div>
+                    <div class="button-wrapper" style="flex-grow:1; text-align:right;">
+                        <div style="display:inline-block;">下载：</div>
+                        <el-button type="text" v-on:click="handleExport('png')">Png</el-button>
+                        <el-button type="text" v-on:click="handleExport('tiff')">Tiff</el-button>
+                        <el-divider direction="vertical"></el-divider>
+                        <el-button type="text" v-on:click="handleClearAllImages">清空</el-button>
+                    </div>
+                </div>
+                <div class="body" style="display:flex;zoom:0.118; flex-flow: wrap;">
+                    <el-card class="box-card canvas-page-item page-item-container" v-for="(page, pageIndex) in newpages" :key="pageIndex">
+                        <!-- border:1px solid #eee; 这里不要为div添加border，否则浏览器计算出来的border宽度会变成5个像素，没有研究具体原因 -->
+                        <div :id="'page-item-wrapper-'+pageIndex" class="page-item-wrapper" :data-page-index="pageIndex">
+                            <template v-for="(row, rowIndex) in page.rows" >
+                                <img
+                                    v-for="(image, index) in row.images"
+                                    class="image-item"
+                                    :src="image.image_url"
+                                    :width="image.width + 'px'"
+                                    :height="image.height + 'px'"
+                                    crossorigin="anonymous"
+                                    :id="image.id"
+                                    :alt="image.sku_id"
+                                    :title="'双击删除：' + image.sku_id"
+                                    :data-index="index"
+                                    :row-index="rowIndex"
+                                    :data-page-index="pageIndex"
+
+                                    v-on:dblclick="handleImageDoubleClick(image, pageIndex, index)"
+                                    v-on:click.right.prevent.stop="handleRightClick(image, $event)"/>
+                            </template>
+                        </div>
+                        <canvas :id="'canvas-' + pageIndex" style="display: none;" :data-page-index="pageIndex" width="2480px" height="3507px"></canvas>
+                    </el-card>
+                </div>
+            </el-main>
+        </el-container>
+    </el-main>
+</el-container>
+<context-menu id="context-menu" class="context-menu" ref="contextMenu">
+    <ul>
+        <li v-on:click="handleDeleteItem">删除本项</li>
+        <li v-on:click="handleDeleteImage">删除本图</li>
+        <!-- <li v-on:click="handleDeleteRow">删除本行</li>
+        <li v-on:click="handleDeletePage">删除本页</li> -->
+    </ul>
+</context-menu>
+</div>
+
+<script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+<script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+<script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+<script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+<script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+<script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/FileSaver.js/2.0.5/FileSaver.min.js" type="application/javascript"></script>
+<!-- <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/nanoid/3.3.1/async/index.browser.min.js" type="application/javascript"></script> -->
+<script src="composition/nanoid.js">
+    
+</script>
+<script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/localforage/1.10.0/localforage.min.js" type="application/javascript"></script>
+<script type="text/javascript" src="static/js/index.js?v=0.01"></script>
+<script type="text/javascript" src="app/service/shape.js"></script>
+<script type="text/javascript" src="app/service/sku.js"></script>
+<script type="text/javascript" src="app/service/sku-shape.js"></script>
+<script type="text/javascript" src="app/service/album.js"></script>
+<script src="composition/index.js?v=0.01"></script>
+</body>
+</html>

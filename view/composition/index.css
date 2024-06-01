@@ -1,0 +1,46 @@
+#canvas-edit-container{position: relative; padding:0; max-width:100%; width: 100%; height: 100%;}
+#canvas-app-body{ overflow: auto;}
+.canvas-page-item{position: relative; display: inline-block; background: white; margin:10px 0 0 10px; padding:0; border:1px solid #eee;}
+.canvas-page-item .el-card__body{padding:0;}
+.canvas-page-item ul{list-style:none;display: inline-block;}
+/* .canvas-page-item li{display: inline-block; position: absolute;} */
+
+#insertHelperDrawer .input-quantity{width:65px;}
+#insertHelperDrawer .input-quantity input{text-align: center;}
+#insertHelperDrawer .input-cargoNumber{width:85px;}
+#insertHelperDrawer .el-table__body-wrapper{overflow-y:auto;}
+
+#context-menu{display: none; position:absolute;z-index:999999; background-color: white;}
+#context-menu, #context-menu ul{padding:0; margin:0;}
+#context-menu li{list-style: none; padding: 5px 15px; font-size: 12px;}
+#context-menu li:hover{ background-color: #eee; cursor: pointer;}
+.el-message--error a, .el-message-box__message a{text-decoration: none; color: #409eff;}
+
+.product-item-inserted{font-size: 24px; color: #409eff;}
+
+.el-collapse-item__wrap{border-bottom:none;}
+
+.clearfix:after{visibility:hidden;display:block;font-size:0;content: " ";clear:both;height:0;}   
+/* .clearfix{*zoom:1;}  */
+
+.card{padding:0px; display:flex; flex-direction:column; margin-left:10px; background-color:white; height:100%; overflow-y:hidden;}
+.card .header{height:35px; border-bottom:1px solid #eee; font-size:14px; color:#606266; line-height:35px; padding:0 10px; background-color:white;}
+.card .header .title{font-size:12px; color:rgb(96, 98, 102);}
+/* .card .header .button-wrapper{float:right;} */
+.card .header .button-wrapper .el-button--text{padding-top:8px; padding-bottom: 8px;}
+.card .body{flex-grow:1; overflow-y: auto;}
+
+/* .batch-list-delete-button{padding: 2px 3px;} */
+.batch-list-delete-button:hover{background-color:white;}
+
+#sku-shapes-table .el-table__empty-block{align-items: stretch;}
+
+/* #preview-container{}
+#preview-container * {margin:0; padding:0; font-size: 12px;} */
+
+.page-item-container{width:2480px; height:3507px; margin:10em 0 0 10em; padding:0;}
+
+/* 为避免坐标计算出错，这里不要添加任何 border，所有数据都要经过计算及测试后才能更改 */
+.page-item-wrapper{position: relative; width:2430px; height:3457px;padding:15px 30px 30px 15px; background:white; overflow:hidden; line-height: 0;}
+
+.page-item-wrapper .image-item{position:relative;  margin:25px 0 0 25px; line-height:0px; display: inline-block;}

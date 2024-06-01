@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="../">
+        <title>相册详情</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+        </style>
+        <link rel="stylesheet" href="album/detail.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+            <div ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" style="height:100%;">
+                <el-container id="main-container" v-cloak>
+                    <el-aside width="280px" style="height: 100%; background-color:white;">
+                        <div class="section">
+                            <div class="section-header" class="clearfix">
+                                <span style="font-size: 12px;">相册详情</span>
+                            </div>
+                            <div class="section-body">
+                                <el-form :inline="false" :model="album" size="mini" label-width="48px">
+                                    <el-form-item label="编号">
+                                        <el-input v-model="album._id" readonly value=""></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="名称">
+                                        <el-input v-model="album.name" autosize placeholder="相册的名称" v-on:change="handleUpdateAlbum"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="客户">
+                                        <el-input v-model="album.owner" placeholder="非必填" v-on:change="handleUpdateAlbum"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="描述">
+                                        <el-input type="textarea" v-model="album.description" autosize placeholder="非必填" v-on:change="handleUpdateAlbum"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                        </div>
+                        <div class="section">
+                            <div class="section-header" class="clearfix">
+                                <span style="font-size: 12px;">自动同步</span>
+                            </div>
+                            <div class="section-body">
+                                <el-form :inline="false" :model="album" size="mini" label-width="48px">
+                                    <el-form-item label="远程">
+                                        <el-input type="textarea" v-model="album.git" autosize placeholder="输入远程地址以开启同步" v-on:change="handleUpdateAlbum"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="本地">
+                                        <el-input v-model="album.path" placeholder="点击右侧按钮选择文件夹" :readonly="true">
+                                            <i 
+                                            slot="suffix"
+                                            title="选择文件夹"
+                                            class="el-icon-folder-opened el-input__icon"
+                                            v-on:click="handleShowOpenDialog"
+                                            style="cursor: pointer;">
+                                        </i>
+                                        </el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                        </div>
+                    </el-aside>
+                    <el-container style="margin-left:10px; padding: 0px; background-color: white;">
+                        <el-header class="section-header content-header" height="40px" style="user-select: none;">
+                            <el-row style="width:100%;">
+                                <el-col :span="14">
+                                    <el-form size="mini" :inline="true">
+                                        <!-- <el-form-item>
+                                            <el-upload action="/api/product/theme/image/upload"
+                                                multiple
+                                                name="image"
+                                                accept=".png"
+                                                :on-success="handleUploadSuccess"
+                                                :data="uploadData"
+                                                :file-list="files"
+                                                :show-file-list="false">
+                                                <el-button size="mini" type="primary">上传图片</el-button>
+                                            </el-upload>
+                                        </el-form-item> -->
+                                        <el-form-item>
+                                            <el-link v-on:click="handleHistoryBack" :underline="false">
+                                                <i class="el-icon-back" style="font-size: 18px;line-height: 26px;"></i>
+                                            </el-link>
+                                        </el-form-item>
+                                        <el-form-item>
+                                            <el-link v-on:click="handleHistoryForward" :underline="false">
+                                                <i class="el-icon-right"style="font-size: 18px;line-height: 26px;"></i>
+                                            </el-link>
+                                        </el-form-item>
+                                        <el-form-item>
+                                            <el-link v-on:click="handleRefresh" :underline="false">
+                                                <i class="el-icon-refresh-right"style="font-size: 18px;line-height: 26px;"></i>
+                                            </el-link>
+                                        </el-form-item>
+                                    </el-form>
+                                </el-col>
+                                <el-col :span="10" style="text-align:right;">
+                                </el-col>
+                            </el-row>
+                        </el-header>
+                        <el-main style="overflow:hidden;">
+                            <iframe id="album-image-frame" :src="'album-image/index.html?albumId=' + albumId" v-if="albumId" style="width:100%; height:100%; border:none; margin:0; padding:0;"></iframe>
+                        </el-main>
+                    </el-container>
+                </el-container>
+            </div>
+        </div>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+        <script type="text/javascript" src="static/js/index.js?v=0.01"></script>
+        <script type="text/javascript" src="app/service/album.js"></script>
+        <script src="album/detail.js?v=0.01"></script>
+	</body>
+</html>

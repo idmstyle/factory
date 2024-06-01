@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <base href="../">
+        <title>印花模板</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            /* #app-header .menu-container li:hover,#app-header .menu-container li.hover{background-color: white;}
+            #app-header .menu-container li:hover a,#app-header .menu-container li.hover a{color: black;} */
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+            /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
+        </style>
+        <link rel="stylesheet" href="template/index.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+<el-container v-cloak style="height:100%;">
+    <el-header class="content-header" id="frame-header" height="40px" shadow="always">
+        <el-col :span="14">
+            <el-form :inline="true" size="mini" v-on:submit.native.prevent>
+                <!-- <el-form-item>
+                    <el-input v-model="keyword" placeholder="">
+                        <el-button slot="append" icon="el-icon-search" v-on:click="handleSearch"></el-button>
+                    </el-input>
+                </el-form-item> -->
+                <el-form-item>
+                    <el-button type="primary" :loading="isUnderDownloading" v-on:click="handleNewItem">新增</el-button>
+                </el-form-item>
+            </el-form>
+            </el-col>
+            <el-col :span="10"></el-col>
+    </el-header>
+    <el-main id="frame-main">
+        <el-table :data="items" :default-sort = "{prop: 'code', order: 'descending'}" stripe style="width: 100%;" height="100%" row-key="code" :highlight-current-row="true" size="mini">
+            <el-table-column prop="code" label="ID" width="80"></el-table-column>
+            <el-table-column prop="name" label="名称" width="180"></el-table-column>
+            <el-table-column prop="category" label="类别" width="120"></el-table-column>
+            <el-table-column prop="is_mixed" label="多图" width="120"></el-table-column>
+            <el-table-column prop="description" label="描述" width="120"></el-table-column>
+            <el-table-column label="操作" align="center">
+                <template slot-scope="scope">
+                    <el-button type="text" v-on:click="handleEditItem(scope.row)" size="mini">编辑</el-button>
+                    <el-link :href="'template/detail.html?id='+scope.row._id" class="detail-link" target="_self" type="primary" :underline="false">详情</el-link>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-main>
+</el-container>
+
+<el-dialog v-cloak title="编辑形状" :visible.sync="editFormVisible" width="360px" :inline="true">
+    <el-form ref="edit-form" :model="current" label-width="60px" size="mini" label-position="right">
+        <el-form-item label="简码">
+            <el-input v-model="current.code"></el-input>
+        </el-form-item>
+        <el-form-item label="名称">
+            <el-input v-model="current.name"></el-input>
+        </el-form-item>
+        <el-form-item label="类别">
+            <el-input v-model="current.category">
+            </el-input>
+        </el-form-item>
+        <el-form-item label="多图">
+            <el-input v-model="current.is_mixed">
+            </el-input>
+        </el-form-item>
+        <el-form-item label="描述">
+            <el-input type="textarea" v-model="current.description"></el-input>
+        </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+        <el-button v-on:click="editFormVisible = false" size="mini">取 消</el-button>
+        <el-button type="primary" v-on:click="handleUpdateItem" size="mini">确 定</el-button>
+    </div>
+</el-dialog>
+</div>
+<script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
+<script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
+<script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
+<script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
+<script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
+<script type="text/javascript" src="static/js/index.js?v=0.01"></script>
+<script type="text/javascript" src="app/service/template.js"></script>
+<script src="template/index.js?v=0.01"></script>
+</body>
+</html>
