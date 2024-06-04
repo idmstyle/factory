@@ -52,7 +52,7 @@
         <div id="app" v-cloak style="background-color: #efefef;">
             <div id="app-header" style="flex-direction: column;">
                 <div class="menu-container">
-                    <ul>
+                    <ul style="user-select: none;">
                         <li class="favorite-item">
                             <a nofollow href="index.html?_path_=view/composition/index.html" target="_blank">手动制版</a>
                         </li>
@@ -82,7 +82,8 @@
                 <div class="userinfo-container"></div>
             </div>
             <div id="app-content" class="content-main">
-                <iframe id="topframe-main" src="about:blank" style="width:100%; height:100%; border: none;padding:0; margin:0;overflow: hidden;" onload="updateDocumentTitle()"></iframe>
+                <!-- 当初始 src=about:blank 时，会出现 updateDocumentTitle 未定义的错误，不明白原因 -->
+                <iframe id="topframe-main" src="#" style="width:100%; height:100%; border: none;padding:0; margin:0;overflow: hidden;" onload="updateDocumentTitle(event)"></iframe>
             </div>
         </div>
         <script type="text/javascript">
@@ -94,13 +95,13 @@
                 // 去掉_path_参数
                 params.delete(key);
                 // 重新构建查询字符串并添加到url
-                const url = `${path}?${params.toString()}`;
+                const url = params.size > 0 ? `${path}?${params.toString()}` : path;
                 // iframe重定向
                 if (url) document.getElementById('topframe-main').setAttribute('src', url);
             }
 
-            function updateDocumentTitle(title = '') {
-                if (!title) title = event.target.contentWindow.document.title;
+            function updateDocumentTitle(event) {
+                let title = event.target.contentWindow.document.title;
                 document.title = title;
             }
         </script>
