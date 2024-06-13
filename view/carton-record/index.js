@@ -26,6 +26,14 @@ const vm = new Vue({
     watch: {
         currentTemplate: async function (newTemplate, oldTemplate) {
             const response = await axios.get('../../data/carton-record/' + newTemplate.records);
+            let records = response.data;
+            for(let record of records) {
+                record.length = Number(record.length).toFixed(2);
+                record.width = Number(record.width).toFixed(2);
+                record.height = Number(record.height).toFixed(2);
+                record.weight = Number(record.weight).toFixed(2);
+                record.average_weight = Number(record.weight * 1000 / record.quantity).toFixed(2);
+            }
             this.records = response.data;
         }
     },
@@ -35,7 +43,7 @@ const vm = new Vue({
         },
         handleCopyFormatedText: function (row) {
             let vm = this;
-            let text = `数量：${row.quantity}${row.unit}；\r\n毛重：${row.weight}KG；\r\n外箱尺寸：${row.length}x${row.width}x${row.height}cm；\r\n数据仅供参考，不同批次存在差异，请以实际发出数据为准。`;
+            let text = `数量：${row.quantity} ${row.unit}；\r\n毛重：${row.weight} KG；\r\n外箱尺寸：${row.length} * ${row.width} * ${row.height} CM；\r\n数据仅供参考，不同批次存在差异，请以实际发出数据为准。`;
             navigator.clipboard.writeText(text).then(
                 function () {
                     vm.$message({type: 'success', message: '已复制'});

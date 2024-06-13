@@ -69,11 +69,7 @@
                         <el-table-column prop="width" label="宽（cm）" width="85" align="center"></el-table-column>
                         <el-table-column prop="height" label="高（cm）" width="85" align="center"></el-table-column>
                         <el-table-column prop="weight" label="毛重（kg）" width="85" align="center"></el-table-column>
-                        <!-- <el-table-column prop="weight" label="均重（g）" width="85" align="center">
-                            <template slot-scope="scope">
-                                <span>@{{Math.ceil(scope.row.weight / scope.row.quantity * 10000)/10}}</span>
-                            </template>
-                        </el-table-column> -->
+                        <el-table-column prop="average_weight" label="均重（g）" width="85" align="center"></el-table-column>
                         <el-table-column prop="carton" label="淘宝箱型号" width="90" align="center"></el-table-column>
                         <el-table-column prop="description" label="装箱说明"></el-table-column>
                         <el-table-column label="操作" width="200" align="center">
