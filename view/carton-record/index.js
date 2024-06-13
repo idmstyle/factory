@@ -20,6 +20,7 @@ const vm = new Vue({
         return new Promise(async function (resolve, reject) {
             const response = await axios.get('../../data/carton-record/index.json');
             vm.templates = response.data;
+            vm.currentTemplate = vm.templates[0];
         });
     },
     watch: {

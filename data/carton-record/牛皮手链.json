@@ -1,0 +1,16 @@
+[
+    {"id": 1, "quantity": 100, "remark": "暗扣款", "length": 30, "width": 20, "height": 18, "weight": 1.35, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 2, "quantity": 200, "remark": "C扣款", "length": 35.5, "width": 25, "height": 20, "weight": 2.15, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 3, "quantity": 200, "remark": "C扣款半成品", "length": 26, "width": 15, "height": 19, "weight": 1.4, "carton": "", "description": "20条/包", "unit": "条"},
+    {"id": 4, "quantity": 300, "remark": "C扣款", "length": 30, "width": 29, "height": 23, "weight": 3.1, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 5, "quantity": 300, "remark": "暗扣款半成品（不含扣子）", "length": 29, "width": 18, "height": 20, "weight": 2.35, "carton": "", "description": "20条/包", "unit": "条"},
+    {"id": 6, "quantity": 400, "remark": "C扣款", "length": 43, "width": 22, "height": 28, "weight": 4.1, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 7, "quantity": 500, "remark": "C扣款", "length": 44, "width": 21, "height": 39.5, "weight": 5.15, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 8, "quantity": 540, "remark": "C扣款", "length": 43, "width": 23, "height": 38, "weight": 6.45, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 9, "quantity": 600, "remark": "13#复古弯管牛皮手链", "length": 34, "width": 37, "height": 27, "weight": 7.5, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 10, "quantity": 602, "remark": "C扣款", "length": 35, "width": 35, "height": 35, "weight": 6.25, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 11, "quantity": 610, "remark": "暗扣款", "length": 44, "width": 36, "height": 28, "weight": 7.8, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 12, "quantity": 800, "remark": "C扣款", "length": 44, "width": 38, "height": 27, "weight": 8.55, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 13, "quantity": 1000, "remark": "C扣款", "length": 40, "width": 40, "height": 40, "weight": 10.7, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 14, "quantity": 1000, "remark": "黑色按扣款", "length": 40, "width": 40, "height": 40, "weight": 12.3, "carton": "", "description": "10条/包", "unit": "条"}
+]

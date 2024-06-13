@@ -42,7 +42,7 @@
                                 </el-select>
                             </el-form-item> -->
                             <el-form-item v-show="templates">
-                                <el-select v-model="currentTemplate" value-key="id" placeholder="请选择分类" style="width: 120px;">
+                                <el-select v-model="currentTemplate" value-key="id" placeholder="请选择分类" style="width: 160px;">
                                     <el-option v-for="template in templates" :key="template.id" :label="template.name" :value="template"></el-option>
                                 </el-select>
                             </el-form-item>
