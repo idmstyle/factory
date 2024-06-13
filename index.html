@@ -5,23 +5,23 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
         <base target="root" />
-        <title>新建标签页</title>
-		<link href="view/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
-        <link href="view/favicon.ico" rel="icon"/>
+        <title>首页</title>
+		<link href="static/favicon-256.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="static/favicon-256.ico" rel="icon"/>
         <style type="text/css">
             *{padding: 0; margin: 0; font-size: 12px;}
             html{zoom:1;}
             html,body,#app{width: 100%; height: 100%; overflow: hidden;}
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( 'view/static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            [v-cloak]{display:none; background-image:url( 'static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
-            #app-header{padding:0 10px; height: 20px; min-height:20px; overflow: hidden; /*background-color: #363636;*/background-color: white; color: #999; display: flex; border-bottom: 1px solid #eee;}
+            #app-header{padding:0 10px; height: 24px; min-height:24px; line-height: 24px; overflow: hidden; /*background-color: #363636;*/background-color: #363636; display: flex; border-bottom: 1px solid #eee;}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
             #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
             #app-header .menu-container ul{white-space: nowrap;}
             #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
             #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
-            #app-header .menu-container li a{color: #999; color:black; line-height: 20px; text-decoration: none;font-size: 10px;}
+            #app-header .menu-container li a{color: #999; line-height: 20px; text-decoration: none;font-size: 10px;}
             #app-header .menu-container li:hover{background-color: white;}
             #app-header .menu-container li:hover a{color: black;}
             #app-content{flex-grow: 1; overflow: hidden;}
@@ -54,31 +54,31 @@
                 <div class="menu-container">
                     <ul style="user-select: none;">
                         <li class="favorite-item">
-                            <a nofollow href="index.html?_path_=view/composition/index.html" target="_blank">手动制版</a>
+                            <a nofollow href="index.html?_path_=view/composition/index.html">手动制版</a>
                         </li>
                         <li>
-                            <a nofollow href="index.html?_path_=view/sku/detail.html" target="_blank">货号管理</a>
+                            <a nofollow href="index.html?_path_=view/sku/detail.html">货号管理</a>
                         </li>
                         <li>
-                            <a nofollow href="index.html?_path_=view/album/index.html" target="_blank">我的相册</a>
+                            <a nofollow href="index.html?_path_=view/album/index.html">我的相册</a>
                         </li>
                         <li>
-                            <a nofollow href="index.html?_path_=view/template/index.html" target="_blank">产品模板</a>
+                            <a nofollow href="index.html?_path_=view/template/index.html">产品模板</a>
                         </li>
                         <li>
-                            <a nofollow href="index.html?_path_=view/shape/index.html" target="_blank">印花模板</a>
+                            <a nofollow href="index.html?_path_=view/shape/index.html">印花模板</a>
                         </li>
                         <li>
-                            <a nofollow href="index.html?_path_=view/rendering/creator.html" target="_blank">生成效果图</a>
+                            <a nofollow href="index.html?_path_=view/rendering/creator.html">生成效果图</a>
                         </li>
                         <li>
-                            <a nofollow href="index.html?_path_=view/rendering/album.html" target="_blank">效果图相册</a>
+                            <a nofollow href="index.html?_path_=view/rendering/album.html">效果图相册</a>
                         </li>
+                        <!-- <li>
+                            <a nofollow href="index.html?_path_=view/settings/database.html">数据管理</a>
+                        </li> -->
                         <li>
-                            <a nofollow href="index.html?_path_=view/settings/database.html" target="_blank">数据管理</a>
-                        </li>
-                        <li>
-                            <img src="http://localhost:7015/storage/album/200/20x20%E5%BF%83/01.png"/>
+                            <a nofollow href="index.html?_path_=view/carton-record/index.html">装箱记录</a>
                         </li>
                     </ul>
                 </div>
