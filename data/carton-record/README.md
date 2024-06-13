@@ -1,0 +1,1 @@
+{"id": , "quantity": , "remark": "", "length": , "width": , "height": , "weight": , "carton": "", "description": "10个/包", "unit": "个"},
