@@ -1,0 +1,10 @@
+[
+    {"id": 1, "quantity": 100, "remark": "", "length": 18, "width": 12, "height": 10, "weight": 1.35, "carton": "", "description": "10个/包", "unit": "个"},
+    {"id": 2, "quantity": 300, "remark": "", "length": 23, "width": 14, "height": 17, "weight": 4.05, "carton": "7#淘宝箱", "description": "10个/包", "unit": "个"},
+    {"id": 3, "quantity": 500, "remark": "", "length": 29, "width": 20, "height": 18, "weight": 6.8, "carton": "", "description": "10个/包", "unit": "个"},
+    {"id": 4, "quantity": 800, "remark": "单吊坠（不含圈）", "length": 29, "width": 17, "height": 20, "weight": 7.85, "carton": "", "description": "10个/包", "unit": "个"},
+    {"id": 5, "quantity": 1000, "remark": "", "length": 35, "width": 20, "height": 24, "weight": 13.6, "carton": "", "description": "12个/包", "unit": "个"},
+    {"id": 6, "quantity": 1500, "remark": "", "length": 44, "width": 21, "height": 28, "weight": 21.1, "carton": "3#淘宝箱", "description": "10个/包", "unit": "个"},
+    {"id": 7, "quantity": 2000, "remark": "", "length": 32, "width": 32, "height": 32, "weight": 26.9, "carton": "", "description": "10个/包", "unit": "个"},
+    {"id": 8, "quantity": 2500, "remark": "", "length": 30, "width": 30, "height": 40, "weight": 33.45, "carton": "", "description": "10个/包", "unit": "个"}
+]
