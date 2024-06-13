@@ -34,13 +34,14 @@ const vm = new Vue({
             
         },
         handleCopyFormatedText: function (row) {
+            let vm = this;
             let text = `数量：${row.quantity}${row.unit}；\r\n毛重：${row.weight}KG；\r\n外箱尺寸：${row.length}x${row.width}x${row.height}cm；\r\n数据仅供参考，不同批次存在差异，请以实际发出数据为准。`;
             navigator.clipboard.writeText(text).then(
                 function () {
-                  /* clipboard successfully set */
+                    vm.$message({type: 'success', message: '已复制'});
                 },
                 function () {
-                  /* clipboard write failed */
+                    vm.$message({type: 'error', message: '复制失败，请刷新后重试'});
                 },
             );
         },
