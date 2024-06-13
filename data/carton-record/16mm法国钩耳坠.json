@@ -1,0 +1,4 @@
+[
+    {"id": 1, "quantity": 100, "remark": "", "length": 19, "width": 11, "height": 14, "weight": 0.65, "carton": "", "description": "10对/包", "unit": "对"},
+    {"id": 2, "quantity": 180, "remark": "", "length": 23, "width": 13, "height": 17, "weight": 1.15, "carton": "", "description": "10对/包", "unit": "对"}
+]

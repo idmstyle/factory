@@ -1,0 +1,8 @@
+[
+    {"id": 1, "quantity": 180, "remark": "", "length": 21, "width": 11, "height": 14, "weight": 2.05, "carton": "8#淘宝箱", "description": "10条/包", "unit": "条"},
+    {"id": 2, "quantity": 200, "remark": "", "length": 21, "width": 11, "height": 14, "weight": 2.25, "carton": "8#淘宝箱", "description": "10条/包", "unit": "条"},
+    {"id": 3, "quantity": 400, "remark": "", "length": 26, "width": 15, "height": 19, "weight": 4.4, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 4, "quantity": 500, "remark": "", "length": 29, "width": 17, "height": 20, "weight": 5.6, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 5, "quantity": 1000, "remark": "", "length": 34, "width": 19, "height": 24, "weight": 10.8, "carton": "", "description": "10条/包", "unit": "条"},
+    {"id": 6, "quantity": 1500, "remark": "", "length": 43, "width": 21, "height": 28, "weight": 16.3, "carton": "", "description": "10条/包", "unit": "条"}
+]
