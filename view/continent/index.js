@@ -21,7 +21,7 @@ const vm = new Vue({
 		isInfiniteScrollDisabled: false,
 		currentPage: 1,
 		pageCount: 1,
-		isPaginationDisabled: false,
+		isPaginationDisabled: true,
 
 		continents: [],
 		currentContinent: {},
