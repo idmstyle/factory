@@ -1,0 +1,4 @@
+[
+    {"index": 1, "name": "法国", "name_en": "French",  "continent": "欧洲", "continent_id": 270, "img": "https://cbu01.alicdn.com/img/ibank/O1CN01zJzjP221HjNfqSq57_!!2214033726960-0-cib.jpg"},
+    {"index": 2, "name": "德国", "name_en": "",  "continent": "欧洲", "continent_id": 270, "img": "https://cbu01.alicdn.com/img/ibank/O1CN01gIJeoh21HjNjeRutd_!!2214033726960-0-cib.jpg"}
+]

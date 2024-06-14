@@ -46,4 +46,4 @@ body{background-color: #f4f4f5;}
 #frame-main{background-color: rgb(244, 244, 245);}
 /* el-icon形式的button */
 .el-icon-button{font-size: 16px; margin-right: 5px; cursor: pointer;}
-.loading{background: url('loading.svg') center center no-repeat;}
+.loading{background: url('../img/loading.svg') center center no-repeat;}

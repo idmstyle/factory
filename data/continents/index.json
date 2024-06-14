@@ -1,0 +1,8 @@
+[
+    {"id": 270, "name": "欧洲", "countries": "europe.json"},
+    {"id": 273, "name": "南美洲", "countries": "south-america.json"},
+    {"id": 274, "name": "亚洲", "countries": "asia.json"},
+    {"id": 275, "name": "北美洲", "countries": "north-america.json"},
+    {"id": 276, "name": "非洲", "countries": "africa.json"},
+    {"id": 340, "name": "大洋洲", "countries": "oceania.json"}
+]
