@@ -1,11 +1,11 @@
 const vm = new Vue({
-    delimiters: ['${', '}'],
+    delimiters: ['<{', '}>'],
 	el: '#app',
 	data: {
         options: {
             title: '款式合集',
             themeCode: '',
-            quantityShow: false,
+            quantityShow: true,
             unitName: '个',
             columns: 5,
             sortType: 'SORT_BY_GROUP',
@@ -13,10 +13,18 @@ const vm = new Vue({
             canvasHeight: 0,
             scale: 10
         },
+        unitName: '个',
         designsWrapperWidth: 0,
         dragover: null,
         images: [],
         sortType: 'asc'
+    },
+    watch: {
+        unitName: function(newUnitName, oldUnitName) {
+            for(let image of this.images) {
+                image.unitName = newUnitName;
+            }
+        }
     },
 	methods: {
 		handleImageRemove: async function(index) {
@@ -83,7 +91,7 @@ function dropHandler(event) {
 
     const images = [], itemLength = items.length;
     files.forEach(function (file) {
-        const image = {name: file.fileName, baseName: file.baseName, fileName: file.fileName, quantity: 0};
+        const image = {name: file.fileName, baseName: file.baseName, fileName: file.fileName, quantity: 0, unitName: vm.options.unitName};
 
         // 从文件名中自动读取前6个字符作为 themeCode
         if (!vm.options.themeCode) vm.options.themeCode = image.baseName.slice(0, 6);
