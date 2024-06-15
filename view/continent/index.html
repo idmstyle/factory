@@ -46,10 +46,12 @@
                         <el-main style="padding:10px 10px 10px 10px; ">
                             <el-form size="mini" v-on:submit.native.prevent label-width="68px" label-position="right">
                                 <el-form-item label="名称">
-                                    <el-input v-model="params.name" placeholder="旗帜中文名称或者英文"></el-input>
+                                    <!-- v-on:keyup.enter 指令无效 -->
+                                    <el-input v-model="params.name" placeholder="旗帜中文名称或者英文" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label="所属洲">
                                     <el-select v-model="currentContinent" value-key="id" placeholder="请选择洲">
+                                        <el-option :key="0" label="全部" :value="null"></el-option>
                                         <el-option v-for="item in continents" :key="item.id" :label="item.name" :value="item"></el-option>
                                     </el-select>
                                 </el-form-item>

@@ -29,18 +29,40 @@ const vm = new Vue({
 	},
 	mounted: async function() {
 		const vm = this;
-		let response = await axios.get('/factory/data/continents/index.json');
+		let response = await axios.get('../../data/continents/index.json');
 		this.continents = response.data;
 		this.currentContinent = this.continents[0];
-	},
-	watch: {
-		currentContinent: async function (newContinent, oldContinent) {
-			let response = await axios.get(`/factory/data/continents/${newContinent.countries}`);
+		for(let index = 0; index < this.continents.length; index++) {
+			let continent = this.continents[index];
+			let response = await axios.get(`../../data/continents/${continent.countries}`);
 			let countries = response.data;
 			for(let country of countries) {
 				country.index_f = '#' + String(country.index).padStart(2, '0');
 			}
-			this.countries = countries;
+			continent.countries = countries;
+		}
+	},
+	watch: {
+		currentContinent: async function (newContinent, oldContinent) {
+			if (newContinent == null) {
+				let countries = [];
+				for(let continent of this.continents) {
+					countries = countries.concat(continent.countries);
+				}
+				this.countries = countries;
+				return ;
+			}
+
+			if ( typeof newContinent.countries == 'string' ) {
+				let response = await axios.get(`../../data/continents/${newContinent.countries}`);
+				let countries = response.data;
+				for(let country of countries) {
+					country.index_f = '#' + String(country.index).padStart(2, '0');
+				}
+				this.countries = newContinent.countries = countries;
+			} else {
+				this.countries = newContinent.countries;
+			}
 		}
 	},
 	methods: {
@@ -56,6 +78,18 @@ const vm = new Vue({
                 },
             );
         },
+		handleSearch: async function () {
+			let countries = [];
+			let name = this.params.name.toLowerCase();
+			for(let continent of this.continents) {
+				for(let country of continent.countries) {
+					if (country.name.indexOf(name) != -1 || country.name_en.toLowerCase().indexOf(name) != -1) {
+						countries.push(country);
+					}
+				}
+			}
+			this.countries = countries;
+		},
 		handleShowNewAlbumDialog: function () {
 			this.current = {_id: '', code: '', path: ''};
 
@@ -113,9 +147,6 @@ const vm = new Vue({
 			
 			this.albums = response.data;
 			this.isAlbumLoading = false;
-		},
-		handleSearch: async function () {
-
 		},
 		handleCurrentPageChange: async function (current) {
 			this.handleLoadAlbums(current);

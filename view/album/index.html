@@ -47,16 +47,16 @@
                         <el-main style="padding:10px 10px 10px 10px; ">
                             <el-form size="mini" v-on:submit.native.prevent label-width="68px" label-position="right">
                                 <el-form-item label="短代码">
-                                    <el-input v-model="params.id" placeholder="相册ID"></el-input>
+                                    <el-input v-model="params.id" placeholder="相册ID" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label="名称">
-                                    <el-input v-model="params.name" placeholder="相册名称或者标题"></el-input>
+                                    <el-input v-model="params.name" placeholder="相册名称或者标题" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label="关联客户">
-                                    <el-input v-model="params.owner" placeholder="客户名称或代码"></el-input>
+                                    <el-input v-model="params.owner" placeholder="客户名称或代码" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label="描述">
-                                    <el-input v-model="params.description" placeholder="描述"></el-input>
+                                    <el-input v-model="params.description" placeholder="描述" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label=" ">
                                     <el-button plain v-on:click="handleSearch">搜索</el-button>
