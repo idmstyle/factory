@@ -4,7 +4,25 @@ const database = new PouchDB('dmstyle_ningxiang_shapes');
 
 const ShapeService = {};
 
-ShapeService.startSync = async function() {}
+ShapeService.startSync = async function() {
+    let remote = localStorage.getItem('couchdb');
+    if (remote == null) {
+        fetch('http://localhost:7015/api/setting?key=couchdb&section=')
+        .then((response) => response.json())
+        .then(function (response) {
+            let remote = response.data;
+            sync(remote);
+            localStorage.setItem('couchdb', remote);
+        });
+    } else {
+        sync(remote);
+    }
+
+    function sync (remote) {
+        const options = { live: true, retry: true };
+        database.sync(`${remote}/dmstyle_ningxiang_shapes`, options);
+    }
+}
 
 ShapeService.find = async function (options = {}) {
     options.limit = 1;
@@ -121,4 +139,4 @@ function getNumberFieldNames() {
     return ['width', 'height', 'row_span', 'col_span', 'max_rows', 'max_cols', 'sort'];
 }
 
-module.exports = ShapeService;
+if (typeof module != 'undefined') module.exports = ShapeService;

@@ -12,11 +12,11 @@ const vm = new Vue({
     mounted: async function() {
         const vm = this;
         return new Promise(async function (resolve, reject) {
-            const response = await axios.get('/shape/get');
-            vm.shapes = response.data;
-            ShapeService.startSync();
-            // const shapes = await ShapeService.findAll();
-            // vm.shapes = shapes;
+            // const response = await axios.get('/shape/get');
+            // vm.shapes = response.data;
+            await ShapeService.startSync();
+            const shapes = await ShapeService.findAll();
+            vm.shapes = shapes;
         });
     },
     methods: {
