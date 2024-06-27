@@ -71,3 +71,55 @@ const openNewTab = window.parent ? window.parent.openNewTab : function (title, u
     // 如果没有父页面或二者父页面定义openNewTab函数，则在当前标签页打开
     window.location.href = url;
 };
+
+// 使用 core 包裹，减少命名冲突
+const core = {
+    _user: null,
+    _axios: null,
+
+    init: function () {
+        this.forceAuth();
+    },
+
+    get user () {
+        if (this._user == null) {
+            let userStr = window.localStorage.getItem('user');
+            if (!userStr) return null;
+        
+            this._user = JSON.parse(userStr);
+        }
+
+        return this._user;
+    },
+
+    get axios () {
+        if (typeof axios != 'function') return null;
+
+        if (this._axios == null) {
+            const instance = axios.create();
+        
+            instance.defaults.baseURL = window.env == 'production' ? 'https://open.dmstyle.cn' : 'http://localhost:3333';
+            
+            if (this.user != null) {
+                const token = this.user.authorization;
+                if (!token.toLowerCase().startsWith('bearer')) {
+                    token = 'Bearer ' + token;
+                }
+                instance.defaults.headers.common['Authorization'] = token;
+            }
+    
+            this._axios = instance;
+        }
+
+        return this._axios;
+    },
+    // 简单的强制登录
+    forceAuth: function () {
+        if (this.user == null || this.user.authorization == undefined) {
+            let win = window.parent;
+            win.location.href = '/auth/login?redirect=' + encodeURIComponent(win.location.href);
+        }
+    }
+}
+
+core.init();
