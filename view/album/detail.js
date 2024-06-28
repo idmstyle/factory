@@ -42,20 +42,19 @@ const vm = new Vue({
     mounted: async function () {
         const albumId = getAlbumIdFromSearchParams();
         this.albumId = albumId;
-        const response = await axios.post('/album/show', {id: albumId});
+        const response = await core.axios.get(`api/albums/${albumId}`, {id: albumId});
         this.album = response.data;
         
         // 在页面标题中显示更多信息，便于切换用户快速定位相应的标签页
-        document.title = `${this.album._id} ${this.album.name} - 我的相册`;
+        document.title = `${this.album.code} ${this.album.name} - 我的相册`;
     },
 	methods: {
         handleUpdateAlbum: async function () {
             const album = this.album;
-            const response = await axios.post('/album/update', album);
-            if (response.data.ok) {
-                album._rev = response.data.rev;
+            const response = await core.axios.put(`api/albums/${album.id}`, album);
+            if (response.status == 200) {
+                this.album = Object.assign(this.album, response.data);
                 this.$message({type: 'success', message: '更新成功'});
-                localStorage.setItem('_dmstyle_album_path_' + album._id, album.path);
             } else {
                 this.$message.error('更新出错，请稍后重试');
             }

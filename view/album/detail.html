@@ -4,18 +4,17 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
-        <base href="../">
         <title>相册详情</title>
 		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
         <link href="favicon.ico" rel="icon"/>
         <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
-        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <link rel="stylesheet" href="../../static/css/index.css?v=0.01"/>
         <style type="text/css">
             *{padding: 0; margin: 0; font-size: 12px;}
             html{zoom:1;}
             html,body,#app{width: 100%; height: 100%; overflow: hidden;}
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
             #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
@@ -28,7 +27,7 @@
             #app-header .menu-container li:hover a{color: black;}
             #app-content{flex-grow: 1; overflow: hidden;}
         </style>
-        <link rel="stylesheet" href="album/detail.css">
+        <link rel="stylesheet" href="detail.css">
 	</head>
 	<body>
         <div id="app" v-cloak>
@@ -41,40 +40,17 @@
                             </div>
                             <div class="section-body">
                                 <el-form :inline="false" :model="album" size="mini" label-width="48px">
-                                    <el-form-item label="编号">
-                                        <el-input v-model="album._id" readonly value=""></el-input>
+                                    <el-form-item label="短代码">
+                                        <el-input v-model="album.code" placeholder="自定义短代码" value=""></el-input>
                                     </el-form-item>
                                     <el-form-item label="名称">
-                                        <el-input v-model="album.name" autosize placeholder="相册的名称" v-on:change="handleUpdateAlbum"></el-input>
+                                        <el-input v-model="album.name" autosize placeholder="相册的名称" v-on:blur="handleUpdateAlbum"></el-input>
                                     </el-form-item>
-                                    <el-form-item label="客户">
-                                        <el-input v-model="album.owner" placeholder="非必填" v-on:change="handleUpdateAlbum"></el-input>
+                                    <el-form-item label="标签">
+                                        <el-input v-model="album.tag" placeholder="非必填" v-on:blur="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                     <el-form-item label="描述">
-                                        <el-input type="textarea" v-model="album.description" autosize placeholder="非必填" v-on:change="handleUpdateAlbum"></el-input>
-                                    </el-form-item>
-                                </el-form>
-                            </div>
-                        </div>
-                        <div class="section">
-                            <div class="section-header" class="clearfix">
-                                <span style="font-size: 12px;">自动同步</span>
-                            </div>
-                            <div class="section-body">
-                                <el-form :inline="false" :model="album" size="mini" label-width="48px">
-                                    <el-form-item label="远程">
-                                        <el-input type="textarea" v-model="album.git" autosize placeholder="输入远程地址以开启同步" v-on:change="handleUpdateAlbum"></el-input>
-                                    </el-form-item>
-                                    <el-form-item label="本地">
-                                        <el-input v-model="album.path" placeholder="点击右侧按钮选择文件夹" :readonly="true">
-                                            <i 
-                                            slot="suffix"
-                                            title="选择文件夹"
-                                            class="el-icon-folder-opened el-input__icon"
-                                            v-on:click="handleShowOpenDialog"
-                                            style="cursor: pointer;">
-                                        </i>
-                                        </el-input>
+                                        <el-input type="textarea" v-model="album.desc" autosize placeholder="非必填" v-on:blur="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                 </el-form>
                             </div>
@@ -127,11 +103,10 @@
         </div>
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
         <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
-        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
-        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
-        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
-        <script type="text/javascript" src="static/js/index.js?v=0.01"></script>
-        <script type="text/javascript" src="app/service/album.js"></script>
-        <script src="album/detail.js?v=0.01"></script>
+        <!-- <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script> -->
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.7.2/dist/axios.min.js"></script>
+        <script type="text/javascript" src="../../static/js/index.js?v=0.01"></script>
+        <!-- <script type="text/javascript" src="app/service/album.js"></script> -->
+        <script src="detail.js?v=0.01"></script>
 	</body>
 </html>
