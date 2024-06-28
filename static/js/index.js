@@ -101,7 +101,7 @@ const core = {
             instance.defaults.baseURL = window.env == 'production' ? 'https://open.dmstyle.cn' : 'http://localhost:3333';
             
             if (this.user != null) {
-                const token = this.user.authorization;
+                let token = this.user.authorization;
                 if (!token.toLowerCase().startsWith('bearer')) {
                     token = 'Bearer ' + token;
                 }
