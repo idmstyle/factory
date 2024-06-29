@@ -44,7 +44,9 @@ const vm = new Vue({
         baseURL: core.axios.defaults.baseURL,
         zoom: {},
         tag: "圆形",
-        uploadURL: ""
+        uploadURL: "",
+        imageDetailVisible: false,
+        currentImage: {},
     },
     mounted: async function () {
         const albumId = getAlbumIdFromSearchParams();
@@ -100,12 +102,16 @@ const vm = new Vue({
             const response = await core.axios.get('api/album_images', config);
             const images = response.data;
             this.images = images;
-
-            // if ( !this.history.includes(child) ) this.history.push(child);
-            // this.child = child;
         },
-        handleImageSelect: async function () {
-
+        handleImageSelect: async function (index, image) {
+            this.imageDetailVisible = true;
+            this.currentImage = image;
+        },
+        handleSetAsAlbumCover: async function () {
+            let albumId = this.albumId;
+            let url = this.currentImage.url;
+            let response = await core.axios.put(`api/albums/${albumId}`, {cover: url});
+            console.log('response:', response);
         },
         handleUploadSuccess: function (response, file, fileList) {
             let isNew = true;
