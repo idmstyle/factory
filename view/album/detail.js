@@ -15,29 +15,9 @@ const vm = new Vue({
     delimiters: ['<{', '}>'],
 	el: '#app',
 	data: {
-        options: {
-            title: '款式合集',
-            themeCode: '',
-            quantityShow: false,
-            unitName: '个',
-            columns: 7,
-            sortType: 'SORT_BY_GROUP',
-            canvasWidth: 0,
-            canvasHeight: 0,
-            scale: 10,
-        },
-        designsWrapperWidth: 0,
-        dragover: null,
-        sortType: 'asc',
-        imageType: 0,
-        theme: window.theme,
+        files: [],
         album: {},
         albumId: null,
-        category: null,
-        files: [],
-        history: [],
-        child: '',
-
         images: [],
         uploadData: {},
         uploadHeaders: {},
@@ -111,7 +91,7 @@ const vm = new Vue({
             let albumId = this.albumId;
             let url = this.currentImage.url;
             let response = await core.axios.put(`api/albums/${albumId}`, {cover: url});
-            console.log('response:', response);
+            if(response.status == 200) this.$message({type: 'success', message: '设置成功'});
         },
         handleUploadSuccess: function (response, file, fileList) {
             let isNew = true;
@@ -124,95 +104,8 @@ const vm = new Vue({
             }
 
             if (isNew) this.images.push(response);
-            // this.$message({type: 'success', message: '操作成功'});
-        },
-        handleShowOpenDialog: async function () {
-            const options = {
-                defaultPath: this.album.path
-            };
-            const response = await axios.post('dialog/selectDirectory', options);
-
-            // 没有选择文件夹，不需要更新
-            if (!response.data) return true;
-
-            this.album.path = response.data;
-            this.handleUpdateAlbum();
-            this.handleRefresh();
-        },
-        handleHistoryBack: function () {
-            getAlbumImageFrameContentWindow().history.back();
-        },
-        handleHistoryForward: function () {
-            getAlbumImageFrameContentWindow().history.forward();
-        },
-        handleRefresh: async function () {
-            getAlbumImageFrameContentWindow().history.reload();
-        },
+        }
 	}
 });
-
-function getAlbumImageFrameContentWindow() {
-    return document.getElementById('album-image-frame').contentWindow
-}
-
-// function getAlbumPathMappings(filepath) {
-//     try {
-//         return require(filepath);
-//     } catch (error) {
-//         return {};
-//     }
-// }
-
-function dragOverHandler(event) {
-    event.preventDefault();
-}
-
-function dropHandler(event) {
-    event.preventDefault();
-
-    const items = event.dataTransfer.items;
-    const files = validImageFileFilter(items);
-
-    const images = [], itemLength = items.length;
-    files.forEach(function (file) {
-        const image = {name: file.fileName, baseName: file.baseName, fileName: file.fileName, quantity: 0};
-
-        // 从文件名中自动读取前6个字符作为 themeCode
-        if (!vm.options.themeCode) vm.options.themeCode = image.baseName.slice(0, 6);
-
-        const reader = new FileReader();
-        reader.onloadend = function(e){
-            image.url = e.target.result;
-            images.push(image);
-            if (images.length === itemLength) vm.images = listAlignment(vm.images.concat(images), vm.options.columns);
-            vm.refreshHandler();
-        };
-        reader.readAsDataURL(file.file);
-    });
-}
-
-/**
- * 筛选有效的图片类型文件
- * 
- * @param {DataTransferItemList} items 
- * @returns Array 通过测试的文件数组
- */
-function validImageFileFilter(items) {
-    const valid = [];
-    for (var i = 0; i < items.length; i++) {
-        const item = items[i];
-        // 仅支持图片类型的文件
-        if (item.kind !== 'file' || !item.type.match('^image/')) continue;
-        
-        const file = item.getAsFile();
-        valid.push({
-            file: file,
-            baseName: file.name, // 包含扩展名
-            fileName: file.name.replace(/\.([0-9a-z]+)(?:[\?#]|$)/i, ''), // 不含扩展名
-        });
-    }
-
-    return valid;
-}
 
 })(window);
