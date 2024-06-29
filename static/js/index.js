@@ -8,9 +8,11 @@
  * testing 测试环境
  * development 开发环境
  */
-if ( !('env' in window) ) window.env = function () {
-    const env = window.localStorage.getItem("environment");
-    return env in ["production", "development", "testing"] ? env : "production";
+if ( !('env' in window) ) {
+    let env = window.localStorage.getItem("environment");
+    if ( !["production", "development", "testing"].includes(env) ) env = "production";
+
+    window.env = env;
 }
 
 /**
@@ -97,7 +99,7 @@ const core = {
 
         if (this._axios == null) {
             const instance = axios.create();
-        
+            // 根据当前的环境变量来初始化 api 的 baseURL
             instance.defaults.baseURL = window.env == 'production' ? 'https://open.dmstyle.cn' : 'http://localhost:3333';
             
             if (this.user != null) {
