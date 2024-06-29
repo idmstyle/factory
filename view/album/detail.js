@@ -28,7 +28,6 @@ const vm = new Vue({
         },
         designsWrapperWidth: 0,
         dragover: null,
-        images: [],
         sortType: 'asc',
         imageType: 0,
         theme: window.theme,
@@ -36,17 +35,47 @@ const vm = new Vue({
         albumId: null,
         category: null,
         files: [],
+        history: [],
+        child: '',
+
+        images: [],
         uploadData: {},
-        baseURL: axios.defaults.baseURL,
+        uploadHeaders: {},
+        baseURL: core.axios.defaults.baseURL,
+        zoom: {},
+        tag: "圆形",
+        uploadURL: ""
     },
     mounted: async function () {
         const albumId = getAlbumIdFromSearchParams();
         this.albumId = albumId;
+
+        this.uploadURL = core.axios.defaults.baseURL + "/api/album_images/upload";
+        this.uploadData = {
+            albumId: this.albumId,
+            tag: this.tag,
+        };
+        this.uploadHeaders = {
+            Authorization: core.axios.defaults.headers.common["Authorization"]
+        };
+
         const response = await core.axios.get(`api/albums/${albumId}`, {id: albumId});
         this.album = response.data;
         
         // 在页面标题中显示更多信息，便于切换用户快速定位相应的标签页
         document.title = `${this.album.code} ${this.album.name} - 我的相册`;
+
+        this.loadAlbumImages();
+    },
+    watch: {
+        tag: async function (newTag, oldTag) {
+            this.uploadData = {
+                albumId: this.albumId,
+                tag: this.tag
+            };
+
+            this.loadAlbumImages();
+        }
     },
 	methods: {
         handleUpdateAlbum: async function () {
@@ -58,6 +87,25 @@ const vm = new Vue({
             } else {
                 this.$message.error('更新出错，请稍后重试');
             }
+        },
+        loadAlbumImages: async function() {
+            const albumId = this.albumId;
+            const tag = this.tag;
+            const config = {
+                params: {
+                    albumId: albumId,
+                    tag: tag
+                }
+            };
+            const response = await core.axios.get('api/album_images', config);
+            const images = response.data;
+            this.images = images;
+
+            // if ( !this.history.includes(child) ) this.history.push(child);
+            // this.child = child;
+        },
+        handleImageSelect: async function () {
+
         },
         handleUploadSuccess: function (response, file, fileList) {
             let isNew = true;

@@ -61,10 +61,22 @@
                             <el-row style="width:100%;">
                                 <el-col :span="14">
                                     <el-form size="mini" :inline="true">
-                                        <!-- <el-form-item>
-                                            <el-upload action="/api/product/theme/image/upload"
+                                        <el-form-item style="width:100px;">
+                                            <!-- category的值对应图片存放的子目录名称 -->
+                                            <!-- 圆形不需要子目录，文件存放时会自动忽略名为“圆形”的子目录结构 -->
+                                            <el-select v-model="tag" size="mini" placeholder="按形状筛选">
+                                                <el-option key="全部类型" label="全部类型" :value="null"></el-option>
+                                                <el-option key="圆形" label="圆形" value="圆形"></el-option>
+                                                <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
+                                                <el-option key="25x25心" label="25x25心" value="25x25心"></el-option>
+                                                <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
+                                            </el-select>
+                                        </el-form-item>
+                                        <el-form-item>
+                                            <el-upload :action="uploadURL"
                                                 multiple
-                                                name="image"
+                                                :headers="uploadHeaders"
+                                                name="file"
                                                 accept=".png"
                                                 :on-success="handleUploadSuccess"
                                                 :data="uploadData"
@@ -72,8 +84,8 @@
                                                 :show-file-list="false">
                                                 <el-button size="mini" type="primary">上传图片</el-button>
                                             </el-upload>
-                                        </el-form-item> -->
-                                        <el-form-item>
+                                        </el-form-item>
+                                        <!-- <el-form-item>
                                             <el-link v-on:click="handleHistoryBack" :underline="false">
                                                 <i class="el-icon-back" style="font-size: 18px;line-height: 26px;"></i>
                                             </el-link>
@@ -87,7 +99,7 @@
                                             <el-link v-on:click="handleRefresh" :underline="false">
                                                 <i class="el-icon-refresh-right"style="font-size: 18px;line-height: 26px;"></i>
                                             </el-link>
-                                        </el-form-item>
+                                        </el-form-item> -->
                                     </el-form>
                                 </el-col>
                                 <el-col :span="10" style="text-align:right;">
@@ -95,16 +107,45 @@
                             </el-row>
                         </el-header>
                         <el-main style="overflow:hidden;">
-                            <iframe id="album-image-frame" :src="'album-image/index.html?albumId=' + albumId" v-if="albumId" style="width:100%; height:100%; border:none; margin:0; padding:0;"></iframe>
+                            <!-- <iframe id="album-image-frame" :src="'../album-image/index.html?albumId=' + albumId" v-if="albumId" style="width:100%; height:100%; border:none; margin:0; padding:0;"></iframe> -->
+                            <ul id="design-list" v-if="images.length > 0">
+                                <template v-for="(image,index) of images" >
+                                    <li class="design-item" :style="zoom" :class="image.isActive ? 'active' : ''" v-if="!image.isDirectory" style="width:100px;" v-on:click="handleImageSelect(index, image)">
+                                        <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
+                                            <!-- fit="contain" style="width: 100%; height: 100%;" 为确保图片能够按比例显示，这两个样式都要保留 -->
+                                            <el-image :id="'image-'+image.name" :src="baseURL + '/' + image.url" fit="contain" style="width: 100%; height: 100%;"></el-image>
+                                        </p>
+                                        <p class="design-name" style="font-size:12px; width:100%;">
+                                            <span class="editable-text" style="font-size:12px;"><!-- contenteditable="true" -->
+                                                <{image.name}>
+                                                <template v-if="image.tag && image.tag !='圆形'">(<{image.tag}>)</template>
+                                            </span>
+                                        </p>
+                                    </li>
+                                    
+                                    <li class="design-item" v-else style="width: 100px;" :style="zoom">
+                                        <a v-on:click="handleOpenChildFolder(image)" style="text-decoration: none; color:black;">
+                                            <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
+                                                <!-- <i class="el-icon-folder" style="font-size: 70px;"></i> -->
+                                                <el-image src="static/img/envelope_files_folder_interface_office_icon.png" fit="contain" style="width: 70%; height: 70%; margin-top:18px;"></el-image>
+                                            </p>
+                                            <p class="design-name" style="width: 100%;">
+                                                <span style="font-size:12px;"><{image.name}></span>
+                                            </p>
+                                        </a>
+                                    </li>
+                                </template>
+                            </ul>
+                            <el-empty class="design-list-empty" v-else description="图片库空空如也"></el-empty>
                         </el-main>
                     </el-container>
                 </el-container>
             </div>
         </div>
-        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
-        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
-        <!-- <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script> -->
-        <script src="https://cdn.jsdelivr.net/npm/axios@1.7.2/dist/axios.min.js"></script>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <!-- <script src="https://unpkg.com/axios@1.7.2/dist/axios.min.js"></script> -->
         <script type="text/javascript" src="../../static/js/index.js?v=0.01"></script>
         <!-- <script type="text/javascript" src="app/service/album.js"></script> -->
         <script src="detail.js?v=0.01"></script>
