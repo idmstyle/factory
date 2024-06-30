@@ -107,6 +107,7 @@ const core = {
                 if (!token.toLowerCase().startsWith('bearer')) {
                     token = 'Bearer ' + token;
                 }
+                token.replace('bearer', 'Bearer');
                 instance.defaults.headers.common['Authorization'] = token;
             }
     
