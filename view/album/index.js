@@ -15,7 +15,7 @@ const vm = new Vue({
             tag: "",
             desc: "",
 			page: 1,
-			perpage: 2
+			perpage: 50
         },
 		isAlbumLoading: true,
 		albumImportResult: [],
