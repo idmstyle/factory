@@ -12,18 +12,31 @@ const vm = new Vue({
     mounted: async function() {
         const vm = this;
         return new Promise(async function (resolve, reject) {
-            // const response = await axios.get('/shape/get');
-            // vm.shapes = response.data;
-            await ShapeService.startSync();
-            const shapes = await ShapeService.findAll();
-            vm.shapes = shapes;
+            const response = await core.axios.get('api/shapes');
+            vm.shapes = response.data;
         });
     },
     methods: {
         handleNewItem: function () {
-            this.$message({message: '功能开发中', type: 'info'});
-            return ;
-            this.current = {_id: '', shape: '', shape_text: ''};
+            // let doc = {
+            //     "_id": "10001",
+            //     "width": 153,
+            //     "height": 153,
+            //     "row_span": 30,
+            //     "col_span": 30,
+            //     "max_rows": 18,
+            //     "max_cols": 13,
+            //     "shape": "CIRCLE",
+            //     "shape_text": "13*13圆tt",
+            //     "sort": 2,
+            //     "subpath": null,
+            //     "created_at": "2022-10-26 02:53:49",
+            //     "updated_at": "2022-10-26 02:53:49"
+            //   };
+            // ShapeService.create(doc);
+            // this.$message({message: '功能开发中', type: 'info'});
+            // return ;
+            this.current = {id: null, shape: '', shape_text: ''};
             this.editFormVisible = true;
         },
         handleSync: async function () {
@@ -50,28 +63,30 @@ const vm = new Vue({
         handleUpdateItem: async function() {
             const vm = this;
             const current = this.current;
-            const isNew = !current.hasOwnProperty('_id') || !current._id;
+            const isNew = !current.hasOwnProperty('id') || !current.id;
 
             const response = isNew
-                ? await axios.post('/shape/create', current)
-                : await axios.post('/shape/update', current);
+                ? await core.axios.post('api/shapes', current)
+                : await core.axios.put(`api/shapes/${current.id}`, current);
 
             if (response.status < 200 || response.status >= 300) {
-                vm.$message.error('更新出错，请稍后重试');
+                vm.$message.error('操作失败，请稍后重试');
                 return ;
             }
 
-            current._id = response.data.id;
-            current._rev = response.data._rev;
+            let data = response.data;
+            current.updatedAt = data.updatedAt;
+            current.createdAt = data.createdAt;
+            current.id = data.id;
 
             // 更新显示的主题列表
             if (isNew) {
-                vm.shapes.unshift(current);
+                vm.shapes.unshift(data);
             } else {
                 vm.shapes.splice(this.currentIndex, 1, current);
             }
 
-            vm.$message({type: 'success', message: '更新成功'});
+            vm.$message({type: 'success', message: '操作成功'});
             vm.editFormVisible = false;
         }
     }

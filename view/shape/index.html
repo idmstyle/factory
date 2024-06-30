@@ -4,18 +4,17 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
-        <base href="../">
         <title>印花模板</title>
 		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
         <link href="favicon.ico" rel="icon"/>
         <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
-        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <link rel="stylesheet" href="../../static/css/index.css?v=0.01"/>
         <style type="text/css">
             *{padding: 0; margin: 0; font-size: 12px;}
             html{zoom:1;}
             html,body,#app{width: 100%; height: 100%; overflow: hidden;}
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
             #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
@@ -28,7 +27,7 @@
             #app-header .menu-container li:hover a{color: black;}
             #app-content{flex-grow: 1; overflow: hidden;}
         </style>
-        <link rel="stylesheet" href="shape/index.css">
+        <link rel="stylesheet" href="index.css">
 	</head>
 	<body>
         <div id="app" v-cloak>
@@ -46,17 +45,17 @@
                 </el-header>
                 <el-main id="frame-main">
                     <el-table :data="shapes" :default-sort = "{prop: 'code', order: 'descending'}" stripe style="width: 100%;" height="100%" row-key="code" :highlight-current-row="true" size="mini">
-                        <el-table-column prop="_id" label="ID" width="80"></el-table-column>
-                        <el-table-column prop="shape_text" label="名称" width="140"></el-table-column>
+                        <el-table-column prop="id" label="ID" width="80"></el-table-column>
+                        <el-table-column prop="shapeText" label="名称" width="140"></el-table-column>
                         <el-table-column prop="width" label="宽（px）" width="100"></el-table-column>
                         <el-table-column prop="height" label="高（px）" width="100"></el-table-column>
-                        <el-table-column prop="row_span" label="行间距（px）" width="100"></el-table-column>
-                        <el-table-column prop="col_span" label="列间距（px）" width="100"></el-table-column>
-                        <el-table-column prop="max_rows" label="最大行数" width="100"></el-table-column>
-                        <el-table-column prop="max_cols" label="最大列数" width="100"></el-table-column>
+                        <el-table-column prop="rowSpan" label="行间距（px）" width="100"></el-table-column>
+                        <el-table-column prop="colSpan" label="列间距（px）" width="100"></el-table-column>
+                        <el-table-column prop="maxRows" label="最大行数" width="100"></el-table-column>
+                        <el-table-column prop="maxCols" label="最大列数" width="100"></el-table-column>
                         <el-table-column prop="shape" label="类别" width="100"></el-table-column>
                         <el-table-column prop="sort" label="排序" width="100"></el-table-column>
-                        <el-table-column prop="subpath" label="二级目录" width="160"></el-table-column>
+                        <el-table-column prop="tag" label="标签" width="160"></el-table-column>
                         <el-table-column label="操作" align="center">
                             <template slot-scope="scope">
                                 <el-button type="text" v-on:click="handleEditItem(scope.$index, scope.row)" size="mini">编辑</el-button>
@@ -69,11 +68,8 @@
             <el-dialog v-cloak title="编辑形状" :visible.sync="editFormVisible" width="600px" :inline="true">
                 <el-form ref="edit-form" :model="current" label-width="100px" size="mini" label-position="right">
                     <el-col :span="11">
-                        <el-form-item label="ID">
-                            <el-input v-model="current._id" ></el-input>
-                        </el-form-item>
                         <el-form-item label="名称">
-                            <el-input v-model="current.shape_text"></el-input>
+                            <el-input v-model="current.shapeText"></el-input>
                         </el-form-item>
                         <el-form-item label="宽">
                             <el-input v-model="current.width">
@@ -95,26 +91,23 @@
                     <el-col :span="2">&nbsp;</el-col>
                     <el-col :span="11">
                         <el-form-item label="行间距">
-                            <el-input v-model="current.row_span">
+                            <el-input v-model="current.rowSpan">
                                 <template slot="append">px</template>
                             </el-input>
                         </el-form-item>
                         <el-form-item label="列间距">
-                            <el-input v-model="current.col_span">
+                            <el-input v-model="current.colSpan">
                                 <template slot="append">px</template>
                             </el-input>
                         </el-form-item>
                         <el-form-item label="最大行数">
-                            <el-input v-model="current.max_rows"></el-input>
+                            <el-input v-model="current.maxRows"></el-input>
                         </el-form-item>
                         <el-form-item label="最大列数">
-                            <el-input v-model="current.max_cols"></el-input>
+                            <el-input v-model="current.maxCols"></el-input>
                         </el-form-item>
-                        <el-form-item label="二级目录">
-                            <el-input v-model="current.subpath"></el-input>
-                        </el-form-item>
-                        <el-form-item label="">
-                            &nbsp;
+                        <el-form-item label="标签">
+                            <el-input v-model="current.tag"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-form>
@@ -127,10 +120,7 @@
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
         <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
         <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
-        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js"></script>
-        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js"></script>
-        <script src="../static/js/index.js?v=0.01" type="text/javascript" ></script>
-        <script src="../static/js/shape-service.js" type="text/javascript" ></script>
-        <script src="shape/index.js?v=0.01" type="text/javascript"></script>
+        <script src="../../static/js/index.js?v=0.01" type="text/javascript" ></script>
+        <script src="index.js?v=0.01" type="text/javascript"></script>
 	</body>
 </html>
