@@ -1,39 +1,5 @@
 (async function(window) {
 'use strict';
-const shapeService = new ShapeService();
-const skuShapeService = new SkuShapeService();
-const skuService = new SkuService();
-// const shapes = await skuShapeService.findAll({});
-// const skus = new Map();
-// for(let shape of shapes) {
-//     let sku = skus.get(shape.sku_id);
-//     if(sku == undefined) {
-//         shape.index = 0;
-//         sku = {
-//             _id: shape.sku_id,
-//             shapes: [shape]
-//         };
-//     } else {
-//         shape.index = sku.shapes.length;
-//         sku.shapes.push(shape);
-//     }
-
-//     skus.set(sku._id, sku);
-// }
-// for(const [key, sku] of skus) {
-//     await skuService.upsert(sku);
-//     console.log('sku create:', key, ';sku_id:', sku._id);
-// }
-
-async function fix() {
-    const shapes = await skuShapeService.findAll({});
-    for(let shape of shapes) {
-        shape.shape_tpl_id = '1' + String(shape.shape_tpl_id).padStart(4, '0');
-        const result = await skuShapeService.update(shape);
-        console.log('result:', result);
-    }
-}
-// fix();
 const vm = new Vue({
     el: '#app',
     delimiters: ['<{', '}>'],
@@ -51,12 +17,10 @@ const vm = new Vue({
         imageBasePath: '',
         skuType: 'I',
         skuItem: {},
-        sku: {name: '演示信息，无需编辑', image_url: ''},
         skuInfo: {name: '演示信息，无需编辑', image_url: ''},
         child: '12012601', // 弃用
 
         imageSelectorDialogVisible: false,
-        shapes: [],
         theme: {code: '', images: []},
         albumCode: '',
         albumId: '',
@@ -69,41 +33,31 @@ const vm = new Vue({
         // 删除按钮的Popover弹出框
         deletePopoverVisible: {},
         category: undefined,
-    },
-    watch: {
-        // inputCode: async function (keyword) {
-        //     let family = genSkuFamily(this.inputType, keyword);
-        //     if (!family) return false;
-        //     [this.sku, this.parent] = family;
-        //     this.handleSearch();
-        // },
-        skuId: function (skuId) {
-            this.theme.code = skuId.slice(0, 3);
-            this.albumId = this.albumCode = skuId.slice(0, 3);
-        }
+
+        sku: {id: null, code: '', image: '', shapes: []},
     },
     mounted: async function () {
         const vm = this;
 
         const params = new URLSearchParams(window.location.search);
-        vm.skuCode = vm.skuId = vm.id = params.get('id') || '';
+        this.sku.id = vm.skuCode = vm.skuId = vm.id = params.get('id') || '';
+        this.sku.code = params.get('code') || '';
 
-        // const shapes = await shapeService.findAll({});
-        const response = await axios.get('/shape/get');
+        const response = await core.axios.get('api/shapes');
         const shapes = response.data;
         const preshapes = {};
-        for(let shape of shapes) preshapes[shape._id] = shape;
+        for(let shape of shapes) preshapes[shape.id] = shape;
         this.preshapes = preshapes;
 
-        if (!!this.skuId) this.handleSearch();
+        if (!!this.sku.id || !!this.sku.code) this.handleSearch();
     },
     methods: {
         getEmptyShape: function () {
             const vm = this;
-            return {id: null, sku_id: vm.skuId, shape_tpl_id: null, width: 0, height: 0, image_url: '', removable: false}
+            return {shape_id: null, width: 0, height: 0, image_url: '', removable: false}
         },
         handleSearch: async function() {
-            // 更新浏览器地址栏
+            // 更新浏览器地址栏的查询参数，以实现刷新后恢复查询状态
             // let href = window.location.href;
             // let index = href.indexOf('code');
             // if (index === -1) {
@@ -113,30 +67,58 @@ const vm = new Vue({
             // }
             // window.history.replaceState(null, null, href);
 
-            const selector = {sku_id: this.skuId};
-            const sort = [{sku_id: 'asc'}];
-            const response = await axios.post('/sku-shape/get', {selector: selector, sort: sort});
-            const shapes = response.data;
-            shapes.push(this.getEmptyShape());
-            this.shapes = shapes;
+            const params =  {code: this.sku.code};
+            const response = await core.axios.get('api/skus', {params: params});
+
+            if (response.data.length > 0) {
+                this.sku = response.data[0];
+            } else {
+                this.sku = {id: null, code: this.sku.code, image: '', shapes: []};
+            }
+
+            if (this.sku.shapes.length == 0 || this.sku.shapes.at(-1).shape_id != null )this.sku.shapes.push(this.getEmptyShape());
         },
 
         // 修改了shape属性
         handleShapeChange: async function(index, shape) {
-            const selected = JSON.parse( JSON.stringify( this.preshapes[shape.shape_tpl_id] ) );
+            const sku = this.sku;
+            const selected = JSON.parse( JSON.stringify( this.preshapes[shape.shape_id] ) );
             
             // 这两个字段必须删除
-            delete selected._id;
-            delete selected._rev;
+            delete selected.id;
 
             shape = Object.assign({}, shape, selected);
-            console.log('shape:', shape);
+            sku.shapes.splice(index, 1, shape);
 
-            this.shapes.splice(index, 1, shape);
+            const isNew = sku.id ? false : true;
+            if (isNew) {
+                this.createSku();
+            } else {
+                this.updateSku();
+            }
+
+
             this.$emit('shapeUpdateEvent', index, shape);
 
             // 如果操作的是列表中最后一项，需要创建一个新的空白模板
-            if (index === this.shapes.length - 1) this.$emit('createEmptyShapeEvent');
+            if (index === sku.shapes.length - 1) this.$emit('createEmptyShapeEvent');
+        },
+        createSku: async function () {
+            const sku = JSON.parse(JSON.stringify(this.sku));
+            if (sku.shapes.at(-1).shape_id == null) sku.shapes.pop();
+
+            const response = await core.axios.post('api/skus', sku);
+            const created = response.data;
+            this.sku.id = created.id;
+            this.sku.createdAt = created.createdAt;
+        },
+        updateSku: async function () {
+            const sku = JSON.parse(JSON.stringify(this.sku));
+            if (sku.shapes.at(-1).shape_id == null) sku.shapes.pop();
+
+            const response = await core.axios.put(`api/skus/${sku.id}`, sku);
+            const updated = response.data;
+            this.sku.updatedAt = updated.updatedAt;
         },
 
         handleShowImageSelector: async function (index, row) {
@@ -144,30 +126,6 @@ const vm = new Vue({
             vm.imageSelectorDialogVisible = true;
             vm.curShapeIndex = index;
             vm.curShape = row;
-        },
-
-        handleSaveSkuInfo: async function() {
-            this.$message('功能开发中');
-            // const data = {id: this.skuId, name: this.skuInfo.name, image_url: this.skuInfo.image_url};
-            // const response = await axios.post('/api/product/sku/store', data);
-            // if (response.status >= 200 && response.status < 300) this.$message({type: 'success', message: '操作成功'});
-        },
-        updateSkuItems: async function (item = null) {
-            const vm = this;
-
-            // for(let skuItem of vm.skuItems) {
-            // 	const item = skuItem.valueOf();
-
-            // 	try {
-            // 		const result = await window.dbCompositionSkus.put(item);
-            // 		// CouchDB 有版本的概念，更新之后一定要获取新的版本号，否则后续修改的还是前面一个版本
-            // 		if (result.ok) skuItem.__rev = result.rev;
-            // 	} catch (err) {
-            // 		console.log(err);
-            // 	}
-            // }
-
-            // vm.$message({message: '已更新',	'type': 'success', 'duration': 800});
         },
 
         /**
@@ -179,101 +137,22 @@ const vm = new Vue({
          */
         handleShapeReset: async function(index, shape) {
             this.hideDeletePopover(index);
+            const sku = this.sku;
             
-            if (!shape._id || shape._id === null) return this.shapes.splice(index, 1, this.getEmptyShape());
-
-            const params = {
-                doc: shape,
-                options: {}
-            };
-            const response = await axios.post(`dms://localhost/sku-shape/delete`, params);
-            if (response.status !== 200) return this.$message.error('重置出错，请稍后重试');
+            if (!shape.shape_id || shape.shape_id === null) return sku.shapes.splice(index, 1, this.getEmptyShape());
 
             // 从列表中删除
-            this.shapes.splice(index, 1);
+            sku.shapes.splice(index, 1);
+            this.updateSku();
 
             // 重置的是列表中最后一项，需要创建一个新的空白shape
-            if (index === this.shapes.length - 1) this.$emit('createEmptyShapeEvent');
+            if (index === sku.shapes.length - 1) this.$emit('createEmptyShapeEvent');
         },
         showDeletePopover: function (index) {
             this.deletePopoverVisible[index] = false;
         },
         hideDeletePopover: function (index) {
             this.deletePopoverVisible[index] = false;
-        },
-        handleSearchOld: async function () {
-            let vm = this, child = vm.child;
-            let skuItem = await skuTable.get({"_id": child});
-            if (skuItem == undefined) {
-                let sku = child.slice(0, 6);
-                skuItem = await skuTable.get({"parent": sku});
-                // 继承来的属性，需要做一些处理
-                if (undefined !== skuItem) {
-                    const subCode = child.slice(-2);
-                    for (let shape of skuItem.shapes) {
-                        shape.image = renderShapeImagePath(shape.image, subCode);
-                        // 后期可以删除的代码
-                        if (!shape.image.startsWith("/images")) shape.image = '/images' + shape.image;
-                    }
-                }
-            }
-
-            // 不存在的item，直接新建一个
-            if (!skuItem) skuItem = {_id: vm.child, parent: vm.sku, isMulti: 0, shapes: [], isInheritable: 1}
-
-            if ( !skuItem.hasOwnProperty('isInheritable') ) skuItem.isInheritable = 1;
-            // 额外多显示一个shape，编辑后作为新的保存，如果不编辑（shapeId==null），则在item保存时删除
-            skuItem['shapes'].push({shapeId: null, index: skuItem.shapes.length, width:0, height:0});
-
-            vm.skuItem = skuItem;
-        },
-        handleIsMulti: async function(item) {
-            const vm = this;
-
-            // 继承来的属性不可修改
-            if ( item.isInherited ) return false;
-
-            // 如是新建的item，并且没有设置 shapes 属性，则无需把 isMulti 状态的变更写入数据库
-            if ( item.shapes.length <= 1 ) return true;
-
-            const items = item.isChild || !item.isInheritable ? [item] : vm.skuItems;
-            for(const skuItem of items) skuItem.isMulti = item.isMulti;
-
-            vm.updateSkuItems();
-        },
-
-        updateSkuItem: async function(skuItem) {
-            const vm = this;
-            const tmpSku = JSON.parse(JSON.stringify(skuItem));
-            tmpSku.modifyTime = Date.now();
-            tmpSku.shapes = tmpSku.shapes.filter( shape => shape !== null && shape.shapeId !== null );
-
-            for (let index=0, length=tmpSku.shapes.length; index < length; index++ ){
-                let shape = tmpSku.shapes[index];
-                delete shape.id;
-                delete shape._id;
-                shape.index = index;
-                shape.image = getSourceImagePath(tmpSku._id, shape.index, tmpSku.isMulti == 1);
-            }
-
-            try {
-                // 操作成功时，返回的是被更新的记录的主键，对于当前表，返回的是_id
-                const result = await skuTable.put(tmpSku);
-
-                axios.put('/api/composition/skus/' + tmpSku._id, tmpSku).then(response => {
-                    if ( response.status != 200) console.error('远程同步出错:', response);
-                }).catch(error => {
-                    console.error('远程同步出错:', error);
-                });
-
-                tmpSku.shapes.push({shapeId: null, index: skuItem.shapes.length, width:0, height:0});
-
-                return [null, tmpSku];
-            } catch (error) {
-                console.log('error: ', error);
-                return [error, null];
-            }
-
         },
         /**
          * 复制shape
@@ -284,17 +163,8 @@ const vm = new Vue({
         handleShapeClone: function (index, row) {
             let shape = JSON.parse(JSON.stringify(row));
 
-            // 如果被clone的shape是通过规则计算出来的，数据库中并没有存储，
-            // 克隆后，新的shape会存储到数据库中，下次查询时，因为已经查询到一条记录，
-            // 就不会再自动生成，这时候相当于漏掉了一条记录，所以这里要多做一个保存的动作
-            if ( !shape.hasOwnProperty('_id') ) {
-                this.$emit('shapeUpdateEvent', index, shape);
-            }
-
-            delete shape._id;
-            delete shape._rev;
-            this.shapes.splice(index + 1, 0, shape);
-            this.$emit('shapeUpdateEvent', index+1, shape);
+            this.sku.shapes.splice(index + 1, 0, shape);
+            this.updateSku();
         },
         /**
          * 图片选择窗口打开事件
@@ -443,14 +313,14 @@ async function updateRemoteShape(shape) {
 
 
 vm.$on('createEmptyShapeEvent', function () {
-    const last = this.shapes.at(-1);
+    const last = this.sku.shapes.at(-1);
 
     // 列表中最后一项是空白模板，就不用创建新的了
-    if (last.shape_tpl_id === null) return false;
+    if (last.shape_id === null) return false;
 
     // this.shapes.push(this.getEmptyShape());
-    const shape = {id: null, sku_id: this.skuId, shape_tpl_id: null, width: 0, height: 0, image_url: ''};
-    this.shapes.push(shape);
+    const shape = {shape_id: null, width: 0, height: 0, image_url: ''};
+    this.sku.shapes.push(shape);
 });
 
 

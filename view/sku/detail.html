@@ -4,18 +4,17 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
-        <base href="../">
         <title>货号管理</title>
 		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
         <link href="favicon.ico" rel="icon"/>
         <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
-        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <link rel="stylesheet" href="../../static/css/index.css?v=0.01"/>
         <style type="text/css">
             *{padding: 0; margin: 0; font-size: 12px;}
             html{zoom:1;}
             html,body,#app{width: 100%; height: 100%; overflow: hidden;}
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
             #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
@@ -28,7 +27,7 @@
             #app-header .menu-container li:hover a{color: black;}
             #app-content{flex-grow: 1; overflow: hidden;}
         </style>
-        <link rel="stylesheet" href="sku/detail.css">
+        <link rel="stylesheet" href="detail.css">
 	</head>
 	<body>
         <div id="app" v-cloak>
@@ -37,38 +36,29 @@
                     <div style="height:35px; border-bottom:1px solid #eee; line-height:35px; padding: 0 10px; font-size:14px; color:#606266; ">货号管理</div>
                     <el-form size="mini" label-width="54px" style="margin:10px;">
                         <el-form-item label="货号">
-                            <el-input name="skuId" v-model="skuId" placeholder="例：20000101" v-on:keyup.enter.native="handleSearch">
-                                <!-- <i slot="suffix" class="el-input__icon el-icon-search"></i> -->
+                            <el-input name="code" v-model="sku.code" placeholder="例：20000101" v-on:keyup.enter.native="handleSearch">
                                 <el-button slot="append" icon="el-icon-search" v-on:click="handleSearch"></el-button>
                             </el-input>
-                            <!-- <el-button type="primary" v-on:click="handleSearch">查询</el-button> -->
-                            <!-- style="width:130px;"  -->
-                        </el-form-item>
-                        <el-form-item label="名称">
-                            <el-input v-model="skuInfo.name" placeholder="产品名称或者描述"></el-input>
                         </el-form-item>
                         <el-form-item label="产品图">
-                            <el-input type="textarea" autosize v-model="skuInfo.image_url" placeholder="产品图链接"></el-input>
+                            <el-input type="textarea" autosize v-model="sku.image" placeholder="产品图链接"></el-input>
                         </el-form-item>
                         <el-form-item label="预览" v-if="skuInfo.image_url">
-                            <el-image :src="skuInfo.image_url" style="width:100px;">
+                            <el-image :src="sku.image" style="width:100px;">
                                 <div slot="error" class="image-slot">
                                     <i class="el-icon-picture-outline"></i>
                                 </div>
                             </el-image>
                         </el-form-item>
-                        <el-form-item>
-                            <!-- <el-button v-on:click="handleSaveSkuInfo">保存</el-button> -->
-                        </el-form-item>
                     </el-form>
                 </el-aside>
                 <el-main class="content-main" style="padding-left:10px;" v-cloak>
-                    <el-table :data="shapes" row-key="id" stripe size="mini" height="100%">
+                    <el-table :data="sku.shapes" row-key="id" stripe size="mini" height="100%">
                         <el-table-column type="index" label="序号" align="center"></el-table-column>
-                        <el-table-column prop="shape_tpl_id" label="形状" width="120" header-align="center" align="center">
+                        <el-table-column prop="shape_id" label="形状" width="120" header-align="center" align="center">
                             <template slot-scope="scope">
-                                <el-select v-model="scope.row.shape_tpl_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
-                                    <el-option v-for="item in preshapes" :key="item._id" :label="item.shape_text" :value="item._id"></el-option>
+                                <el-select v-model="scope.row.shape_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
+                                    <el-option v-for="item in preshapes" :key="item.id" :label="item.shapeText" :value="item.id"></el-option>
                                 </el-select>
                             </template>
                         </el-table-column>
@@ -172,14 +162,7 @@
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
         <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript"></script>
         <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
-        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.min.js" type="application/javascript"></script>
-        <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
-        <script type="text/javascript" src="static/js/index.js?v=0.01"></script>
-        <script type="text/javascript" src="app/service/shape.js"></script>
-        <script type="text/javascript" src="app/service/album.js"></script>
-        <script type="text/javascript" src="app/service/album-image.js"></script>
-        <script type="text/javascript" src="app/service/sku.js"></script>
-        <script type="text/javascript" src="app/service/sku-shape.js"></script>
-        <script src="sku/detail.js?v=0.01"></script>
+        <script type="text/javascript" src="../../static/js/index.js?v=0.01"></script>
+        <script src="detail.js?v=0.01"></script>
 	</body>
 </html>
