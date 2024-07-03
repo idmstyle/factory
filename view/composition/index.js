@@ -5,7 +5,7 @@ const CANVAS_WIDTH = 2480 * CANVAS_RATIO;
 const CANVAS_HEIGHT = 3508 * CANVAS_RATIO;
 const CANVAS = new OffscreenCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-const worker = new Worker('composition/index-worker.js');
+const worker = new Worker('index-worker.js');
 const API_HOST = '';
 worker.addEventListener('message', function (event){
 	const data = event.data;
@@ -128,7 +128,6 @@ const vm = new Vue({
 		contextMenuImage: null,
 		imageContextMenu: null,
 		skuType: 'I',
-		skuCode: '',
 		isBuyerSku: false,
 		currentProductItem : null,
 		currentProductItemIndex: null,
@@ -143,12 +142,16 @@ const vm = new Vue({
 		isFastInsertDisabled: true,
 		newpages: [[]],
 		images: [],
-		preshapes: {}
+		preshapes: {},
+		skuCode: '',
 	},
 	watch: {
+		skuCode: function(skuCode) {
+			this.handleShapesSearch();
+		},
 		skuId: function(newSkuId) {
 			this.skuCode = newSkuId;
-			this.handleShapesSearch();
+			// this.handleShapesSearch();
 		},
 		quantity: function(newNumber) {
 			this.insertItem.quantity = newNumber;
@@ -215,11 +218,11 @@ const vm = new Vue({
 			// });
 			// const shapeService = new ShapeService();
 			// const shapes = await shapeService.findAll({});
-			const response = await axios.get('shape/get');
+			const response = await core.axios.get('api/shapes');
 			const shapes = response.data;
 			const preshapes = {};
 			for(let shape of shapes) {
-				preshapes[shape._id] = shape;
+				preshapes[shape.id] = shape;
 			}
 			vm.preshapes = preshapes;
 
@@ -297,7 +300,7 @@ const vm = new Vue({
 		 * @returns Array
 		 */
 		handleShapesSearch: async function () {
-			if (!this.skuId || this.skuId.length !== 8) {
+			if (!this.skuCode || this.skuCode.length !== 8) {
 				if (this.shapes.length > 0) this.shapes = [];
 				this.isAutoCreateVisible = false;
 				return false;
@@ -310,11 +313,16 @@ const vm = new Vue({
             //     'sku_id': this.skuId
             // };
             // const shapes = await skuShapeService.findAll({selector: selector});
-			const selector = {
-                'sku_id': this.skuId
+			const params = {
+                'code': this.skuCode
             };
-			const response = await axios.post('sku-shape/get', {selector: selector});
-			const shapes = response.data;
+			const response = await core.axios.get('api/skus', {params: params});
+			if (response.data.length <= 0) {
+				return 'Not Found'
+			}
+
+			const sku = response.data[0];
+			const shapes = sku.shapes;
 
 			// console.log(this.shapes);
 			for(var i = 0, len = shapes.length; i < len; i++) {
@@ -336,19 +344,19 @@ const vm = new Vue({
 
 		getImages: function (skuCode, shapes, quantity, batchId) {
 			let images = [];
-			const now = Date.now();
 			quantity = parseInt(quantity);
 
 			shapes.forEach( (shape, index) => {
-				if (shape.shape_text.length <= 0) return true; // 预留坑位，无需处理
+				if (shape.shapeText.length <= 0) return true; // 预留坑位，无需处理
 				
 				for(let count = quantity; count > 0; count--) {
 					// let image = Object.assign({sku: skuCode, batchId: batchId, modifyTime: now}, shape);
 					let image = Object.assign({batch_id: batchId}, shape);
 					// delete image.id; // 这个id为sku记录id，后面插入到images库时，会造成冲突
 					// image.id = uuidv4();
-					image._id = 'id' + nanoid();
-					delete image.shape_text;
+					image.id = 'id-' + nanoid();
+					image.sku_code = skuCode;
+					delete image.shapeText;
 					images.push(image);
 				}
 			});
@@ -358,10 +366,10 @@ const vm = new Vue({
 
 		handleSubmit: async function () {
 			const vm = this;
-			const skuId = String(vm.skuId).toUpperCase();
+			const skuCode = String(vm.skuCode).toUpperCase();
 			if (!vm.shapes || vm.shapes.length === 0) return false;
 
-			let newImages = vm.getImages(skuId, vm.shapes, vm.quantity, vm.batchId);
+			let newImages = vm.getImages(skuCode, vm.shapes, vm.quantity, vm.batchId);
 			
 			
 
@@ -369,9 +377,9 @@ const vm = new Vue({
 
 			if (cacheImages.length > 0) {
 				cacheImages.sort(function(a, b) {
-					if (a.sku_id > b.sku_id) return 1;
-					if (a.sku_id < b.sku_id) return -1;
-					if (a.sku_id == b.sku_id) return 0;
+					if (a.sku_code > b.sku_code) return 1;
+					if (a.sku_code < b.sku_code) return -1;
+					if (a.sku_code == b.sku_code) return 0;
 				});
 	
 				cacheImages.sort(function(a, b) {
@@ -384,7 +392,7 @@ const vm = new Vue({
 
 			vm.images = cacheImages;
 
-			for(let image of newImages) imageStore.setItem(image._id, image).then(function () {
+			for(let image of newImages) imageStore.setItem(image.id, image).then(function () {
 				startCompose(vm.batchId, vm.images);
 			});
 
@@ -492,8 +500,8 @@ const vm = new Vue({
 			// this.doContextMenuDelete({'id': this.contextMenuImage.id});
 			let images = this.images;
 			for(let index = 0, length = images.length; index < length; index++) {
-				if (images[index]._id == this.contextMenuImage._id) {
-					imageStore.removeItem(images[index]._id).then(function () {
+				if (images[index].id == this.contextMenuImage.id) {
+					imageStore.removeItem(images[index].id).then(function () {
 						startCompose(vm.batchId, vm.images);
 					});
 					images.splice(index, 1);
@@ -508,8 +516,8 @@ const vm = new Vue({
 			let toDelete = [];
 			// images 长度会在循环中发生变化，每次循环要重新获取length
 			for(let index = 0; index < images.length; index++) {
-				if (images[index].sku_id == this.contextMenuImage.sku_id){
-					toDelete.push(images[index]._id);
+				if (images[index].sku_code == this.contextMenuImage.sku_code){
+					toDelete.push(images[index].id);
 					deleteCount++;
 					images.splice(index, 1);
 					--index;
@@ -706,18 +714,14 @@ const vm = new Vue({
 			}).catch(() => {});
 		},
 		handleShapeChange:async function (index, shape) {
-			const selected = JSON.parse( JSON.stringify( this.preshapes[shape.shape_tpl_id] ) );
-			delete selected._id;
-			shape = Object.assign({}, shape, selected, {shape_tpl_id: selected.id, id: shape.id});
-
-			console.log('shape:', shape);
-
+			const selected = JSON.parse( JSON.stringify( this.preshapes[shape.shape_id] ) );
+			shape = Object.assign({}, shape, selected, {shape_id: selected.id, id: shape.id});
+			delete shape.id;
 			this.shapes.splice(index, 1, shape);
 		},
-		handleGoToSkuDetail: async function (skuId) {
-			const url = 'view/sku/detail.html?id=' + skuId;
-			const title = '货号管理';
-			openNewTab(title, url);
+		handleGoToSkuDetail: async function (skuCode) {
+			const url = '/factory/index.html?_path_=view/sku/detail.html?code=' + skuCode;
+			window.open(url, '_blank');
 		},
     }
 });

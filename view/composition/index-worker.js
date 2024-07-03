@@ -34,8 +34,8 @@ self.addEventListener('message', function(event){
 
 	function sortBySkuId(images) {
 		images.sort(function(a, b) {
-			if (a.sku_id == b.sku_id) return 0;
-			return a.sku_id > b.sku_id ? 1 : -1;
+			if (a.sku_code == b.sku_code) return 0;
+			return a.sku_code > b.sku_code ? 1 : -1;
 		});
 		return images;
 	}
@@ -74,17 +74,17 @@ self.addEventListener('message', function(event){
 		
 		for(const image of images) {
 			// 检测是否即将发生溢出
-			if ( (row.x + image.row_span + image.width) > options.pageWith - options.pageRightMargin ) {
+			if ( (row.x + image.rowSpan + image.width) > options.pageWith - options.pageRightMargin ) {
 				row = appendNewRow(rows, { x: options.pageLeftMargin });
 			}
 	
-			image.x = row.x + image.col_span;
+			image.x = row.x + image.colSpan;
 			image.rowIndex = rowIndex;
 			row.images.push(image);
 	
 			// 更新行的插入点坐标
 			row.x = image.x + image.width;
-			if (row.height < image.height + image.row_span) row.height = image.height + image.row_span;
+			if (row.height < image.height + image.rowSpan) row.height = image.height + image.rowSpan;
 		}
 	
 		return rows;

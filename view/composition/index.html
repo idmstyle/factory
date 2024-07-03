@@ -4,18 +4,17 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
-        <base href="../">
         <title>快捷制版</title>
-		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
-        <link href="favicon.ico" rel="icon"/>
+		<link href="../../static/favicon-256.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="../../static/favicon-256.ico" rel="icon"/>
         <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
-        <link rel="stylesheet" href="common/index.css?v=0.01"/>
+        <link rel="stylesheet" href="../../static/css/index.css"/>
         <style type="text/css">
             *{padding: 0; margin: 0; font-size: 12px;}
             html{zoom:1;}
             html,body,#app{width: 100%; height: 100%; overflow: hidden;}
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( 'common/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
             #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
@@ -28,7 +27,7 @@
             #app-header .menu-container li:hover a{color: black;}
             #app-content{flex-grow: 1; overflow: hidden;}
         </style>
-        <link rel="stylesheet" href="composition/index.css">
+        <link rel="stylesheet" href="index.css">
 	</head>
 	<body>
         <div id="app" v-cloak>
@@ -37,7 +36,7 @@
         <div style="height:190px;" v-cloak>
             <div style="height:35px; border-bottom:1px solid #eee; font-size:14px; color:#606266; line-height:35px; padding:0 10px;">基础功能</div>
             <!-- 修改表单size时，切记在windows下做个测试，宽度表现在windows和mac之间存在区别 -->
-            <el-form size="mini" label-width="45px" style="padding:10px;">
+            <el-form size="mini" label-width="45px" style="padding:10px;" v-on:submit.native.prevent>
                 <el-form-item label="批次">
                     <el-select v-model="batchId" ref="batchSelect" placeholder="请选择" size="mini" v-on:change="handleBatchIdChange" tabIndex="-1" style="width:155px;">
                         <el-option v-for="(item,index) in batchList" :key="item.id" :label="item.id" :value="item.id" tabIndex="-1" style="padding:0 5px;">
@@ -50,7 +49,7 @@
                     <el-button tabIndex="-1" v-on:click="handleCreateBatch">新建</el-button>
                 </el-form-item>
                 <el-form-item label="货号">
-                    <el-input v-model="skuId" ref="skuIdInput" v-on:keyup.enter.native="handleSubmit" style="width:155px;" placeholder="例：20000101"></el-input>
+                    <el-input v-model="skuCode" ref="skuIdInput" v-on:keyup.enter.native="handleSubmit" style="width:155px;" placeholder="例：20000101"></el-input>
                     <el-button v-on:click="handleShapesSearch" tabIndex="-1">查询</el-button>
                 </el-form-item>
                 <el-form-item label="数量">
@@ -72,8 +71,8 @@
                 </el-table-column>
                 <el-table-column prop="shape_text" label="尺寸" align="center">
                     <template slot-scope="scope">
-                        <el-select v-model="scope.row.shape_tpl_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
-                            <el-option v-for="item in preshapes" :key="item._id" :label="item.shape_text" :value="item._id"></el-option>
+                        <el-select v-model="scope.row.shape_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
+                            <el-option v-for="item in preshapes" :key="item.id" :label="item.shapeText" :value="item.id"></el-option>
                         </el-select>
                     </template>
                 </el-table-column>
@@ -82,13 +81,13 @@
                 </el-table-column>
                 <el-table-column prop="width" label="操作" width="50px" align="center">
                     <template slot-scope="scope">
-                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuId)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">编辑</a>
+                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuCode)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">编辑</a>
                     </template>
                 </el-table-column>
                 <template slot="empty">
                     <div v-if="isAutoCreateVisible">
                         <span>暂无数据，请</span>
-                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuId)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">手动编辑</a>
+                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuCode)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">手动编辑</a>
                     </div>
                     <div v-else>暂无数据</div>
                 </template>
@@ -101,9 +100,9 @@
                 <div class="header clearfix" style="display:flex;">
                     <div class="title" style="width:200px;">预览</div>
                     <div class="button-wrapper" style="flex-grow:1; text-align:right;">
-                        <div style="display:inline-block;">下载：</div>
-                        <el-button type="text" v-on:click="handleExport('png')">Png</el-button>
-                        <el-button type="text" v-on:click="handleExport('tiff')">Tiff</el-button>
+                        <!-- <div style="display:inline-block;">下载：</div> -->
+                        <el-button type="text" v-on:click="handleExport('png')">下载</el-button>
+                        <!-- <el-button type="text" v-on:click="handleExport('tiff')">Tiff</el-button> -->
                         <el-divider direction="vertical"></el-divider>
                         <el-button type="text" v-on:click="handleClearAllImages">清空</el-button>
                     </div>
@@ -121,8 +120,8 @@
                                     :height="image.height + 'px'"
                                     crossorigin="anonymous"
                                     :id="image.id"
-                                    :alt="image.sku_id"
-                                    :title="'双击删除：' + image.sku_id"
+                                    :alt="image.sku_code"
+                                    :title="'双击删除：' + image.sku_code"
                                     :data-index="index"
                                     :row-index="rowIndex"
                                     :data-page-index="pageIndex"
@@ -155,15 +154,15 @@
 <script src="https://idmstyle.github.io/cdn/pouchdb/8.0.1/pouchdb.find.min.js" type="application/javascript"></script>
 <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/FileSaver.js/2.0.5/FileSaver.min.js" type="application/javascript"></script>
 <!-- <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/nanoid/3.3.1/async/index.browser.min.js" type="application/javascript"></script> -->
-<script src="composition/nanoid.js">
+<script src="nanoid.js">
     
 </script>
 <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/localforage/1.10.0/localforage.min.js" type="application/javascript"></script>
-<script type="text/javascript" src="static/js/index.js?v=0.01"></script>
-<script type="text/javascript" src="app/service/shape.js"></script>
+<script type="text/javascript" src="../../static/js/index.js?v=0.01"></script>
+<!-- <script type="text/javascript" src="app/service/shape.js"></script>
 <script type="text/javascript" src="app/service/sku.js"></script>
 <script type="text/javascript" src="app/service/sku-shape.js"></script>
-<script type="text/javascript" src="app/service/album.js"></script>
-<script src="composition/index.js?v=0.01"></script>
+<script type="text/javascript" src="app/service/album.js"></script> -->
+<script src="index.js?v=0.01"></script>
 </body>
 </html>
