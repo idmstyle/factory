@@ -34,9 +34,10 @@
             <el-container>
                 <el-aside width="280px" style="height:100%; background-color:white; /*border-right:1px solid #eee;*/" v-cloak>
                     <div style="height:35px; border-bottom:1px solid #eee; line-height:35px; padding: 0 10px; font-size:14px; color:#606266; ">货号管理</div>
-                    <el-form size="mini" label-width="54px" style="margin:10px;">
+                    <!-- form 和 input 必须同时附加 native 修饰符，form 不加修饰符不起作用，会刷新页面。input 不加修饰符无法成功绑定事件。 -->
+                    <el-form size="mini" label-width="54px" style="margin:10px;" v-on:submit.native.prevent>
                         <el-form-item label="货号">
-                            <el-input name="code" v-model="sku.code" placeholder="例：20000101" v-on:keyup.enter.native="handleSearch">
+                            <el-input type="text" name="code" v-model="sku.code" placeholder="例：20000101" v-on:keyup.native.enter="handleSearch">
                                 <el-button slot="append" icon="el-icon-search" v-on:click="handleSearch"></el-button>
                             </el-input>
                         </el-form-item>
