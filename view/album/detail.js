@@ -45,7 +45,7 @@ const vm = new Vue({
         this.album = response.data;
         
         // 在页面标题中显示更多信息，便于切换用户快速定位相应的标签页
-        document.title = `${this.album.code} ${this.album.name} - 我的相册`;
+        window.parent.document.title = `${this.album.code} ${this.album.name} - 相册详情`;
 
         this.loadAlbumImages();
     },
