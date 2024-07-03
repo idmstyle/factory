@@ -22,7 +22,6 @@ const vm = new Vue({
 
         imageSelectorDialogVisible: false,
         theme: {code: '', images: []},
-        albumCode: '',
         albumId: '',
         albumImageIndexURL: '',
         albumImages: [],
@@ -33,6 +32,9 @@ const vm = new Vue({
         // 删除按钮的Popover弹出框
         deletePopoverVisible: {},
         category: undefined,
+        tag: '圆形',
+        albumCode: '',
+        album: {code: '', images: []},
 
         sku: {id: null, code: '', image: '', shapes: []},
     },
@@ -50,6 +52,14 @@ const vm = new Vue({
         this.preshapes = preshapes;
 
         if (!!this.sku.id || !!this.sku.code) this.handleSearch();
+    },
+    watch: {
+        'sku.code': async function (code) {
+            this.album.code = code.slice(0, 3);
+        },
+        tag: async function(tag) {
+            this.handleShowAlbumImages();
+        }
     },
     methods: {
         getEmptyShape: function () {
@@ -171,49 +181,18 @@ const vm = new Vue({
          */
         handleSelectorDialogOpened: function() {
             // 只有在图片列表为空时，才自动拉取图片列表
-            // if ( !this.theme.images || this.theme.images.length === 0 ) this.handleShowAlbumImages();
-            if ( !this.theme.images || this.theme.images.length === 0 ) this.handleUpdateAlbumImageIndexURL();
-        },
-        /**
-         * 获取主题相关数据
-         *
-         * @returns
-         */
-        handleThemeSearch: async function () {
-            // if (!this.theme.code || this.theme.code.length === 0) return false;
-
-            const dir = encodeURIComponent(this.album.path);
-            const response = await axios.get(`/storage/files/${dir}`);
-            this.theme.images = response.data;
-            this.albumImages = response.data;
+            if ( !this.album.images || this.album.images.length === 0 ) this.handleShowAlbumImages();
         },
         handleUpdateAlbumImageIndexURL: async function () {
             this.albumImageIndexURL = `album-image/index.html?albumId=${this.albumId}`;
         },
         handleShowAlbumImages: async function () {
-            const parsed = SkuService.parse(this.skuId);
-            const albumId = this.albumId = this.albumCode = parsed.albumcode;
-
-            // const response = await axios.get('album-image/get', {albumId: albumId});
-            // const album = await AlbumService.findById(albumId);
-            // const dir = album.dir || album.path;
-
-            // const selector = {
-            //     albumId: albumId,
-            //     albumPath: album.path,
-            //     category: this.category
-            // };
-            // const images = await AlbumImageService.findAll({selector: selector});
-            // this.albumImages = images;
-
-            // const response = await axios.get(`/storage/files/${encodeURIComponent(dir)}`);
-            // const images = response.data;
-
-            // for(let image of images) {
-            //     if (!image.url.startsWith('http')) image.url = axios.defaults.baseURL + image.url;
-            // }
-
-            // this.albumImages = images;
+            const params = {
+                albumCode: this.album.code,
+                tag: this.tag
+            };
+            const response = await core.axios.get('api/album_images', {params: params});
+            this.album.images = response.data;
         },
         /**
          * 选择图片
@@ -222,14 +201,12 @@ const vm = new Vue({
          * @params {Object} image
          * @returns
          */
-        handleImageSelect: function (image) {
-            // this.curShape.image_url = this.addTimestampToUrl(image.url);
+        handleImageSelect: function (index, image) {
             this.curShape.image_url = image.url;
-            this.curShape.image_path = image.path;
             this.imageSelectorDialogVisible = false;
+            this.sku.shapes.splice(this.curShapeIndex, 1, this.curShape)
 
-            // 如果是没有shape.id属性，极有可能也没有设置shape信息，这时候不需要把数据写入后台
-            this.$emit('shapeUpdateEvent', this.curShapeIndex, this.curShape);
+            this.updateSku();
         },
         /**
          * 为链接添加时间戳
