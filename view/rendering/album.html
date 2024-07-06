@@ -148,14 +148,16 @@
                                             <span><{image.name}></span>
                                             <input class="dynamic-input" name="image-name" v-model="image.name" />
                                         </div>
-                                        <div style="display: inline-block;"><span v-show="options.quantityShow">-</span></div>
-                                        <div  style="display: inline-block;" class="dynamic-input-wrapper">
-                                            <span><{image.quantity}></span>
-                                            <input class="dynamic-input" name="image-quantity" v-model="image.quantity" />
-                                        </div>
-                                        <div  style="display: inline-block;" class="dynamic-input-wrapper">
-                                            <span><{image.unitName}></span>
-                                            <input class="dynamic-input" name="unit-name" v-show="options.quantityShow" v-model="image.unitName" />
+                                        <div style="display: inline-block;" v-show="options.quantityShow">
+                                            <div style="display: inline-block;"><span>-</span></div>
+                                            <div  style="display: inline-block;" class="dynamic-input-wrapper">
+                                                <span><{image.quantity}></span>
+                                                <input class="dynamic-input" name="image-quantity" v-model="image.quantity" />
+                                            </div>
+                                            <div  style="display: inline-block;" class="dynamic-input-wrapper">
+                                                <span><{image.unitName}></span>
+                                                <input class="dynamic-input" name="unit-name" v-model="image.unitName" />
+                                            </div>
                                         </div>
                                     </div>
                                 </li>
