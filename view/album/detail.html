@@ -130,24 +130,24 @@
                     :visible.sync="imageDetailVisible"
                     direction="rtl">
                     <div style="padding: 0 10px;">
-                        <!-- <div style="height: 120px;"><el-image :src="baseURL + '/' + currentImage.url"></el-image></div> -->
                         <el-form size="mini" v-if="currentImage" label-position="right" label-width="60px">
                             <el-form-item label="名称">
-                                <el-input v-model="currentImage.name"></el-input>
-                            </el-form-item>
-                            <el-form-item label="短代码">
-                                <el-input v-model="currentImage.code"></el-input>
+                                <el-input v-model="currentImage.name" v-on:change="handleImageUpdate"></el-input>
                             </el-form-item>
                             <el-form-item label="标签">
-                                <el-select v-model="currentImage.tag" size="mini">
+                                <el-select v-model="currentImage.tag" size="mini" v-on:change="handleImageUpdate">
                                     <el-option key="圆形" label="圆形" value="圆形"></el-option>
                                     <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
                                     <el-option key="25x25心" label="25x25心" value="25x25心"></el-option>
                                     <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
                                 </el-select>
                             </el-form-item>
+                            <el-form-item label="描述">
+                                <el-input type="textarea" v-model="currentImage.desc" v-on:change="handleImageUpdate" placeholder="为图片添加描述内容，后期将用于图片搜索"></el-input>
+                            </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" v-on:click="handleSetAsAlbumCover">设为封面</el-button>
+                                <el-button type="danger" v-on:click="handleDeleteImage">删除</el-button>
                             </el-form-item>
                         </el-form>
                     </div>

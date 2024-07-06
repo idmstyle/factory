@@ -27,6 +27,7 @@ const vm = new Vue({
         uploadURL: "",
         imageDetailVisible: false,
         currentImage: {},
+        currentImageIndex: null
     },
     mounted: async function () {
         const albumId = getAlbumIdFromSearchParams();
@@ -86,6 +87,7 @@ const vm = new Vue({
         handleImageSelect: async function (index, image) {
             this.imageDetailVisible = true;
             this.currentImage = image;
+            this.currentImageIndex = index;
         },
         handleSetAsAlbumCover: async function () {
             let albumId = this.albumId;
@@ -104,6 +106,30 @@ const vm = new Vue({
             }
 
             if (isNew) this.images.push(response);
+        },
+        handleImageUpdate: async function () {
+            const image = this.currentImage;
+            const response = await core.axios.put(`api/album_images/${image.id}`, image);
+            this.$message({type: 'success', message: '操作成功'});
+        },
+        handleDeleteImage: async function () {
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '警告', {
+                confirmButtonText: '确认删除',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(this.deleteImage).catch(() => {});
+        },
+        deleteImage: async function () {
+            const image = this.currentImage;
+            const response = await core.axios.delete(`api/album_images/${image.id}`);
+
+            if (response.status == 200) {
+                this.$message({ type: 'success', message: '删除成功!'});
+                this.imageDetailVisible = false;
+                this.images.splice(this.currentImageIndex, 1);
+            } else {
+                this.$message({ type: 'error', message: '操作失败，请刷新页面后重试'});
+            }
         }
 	}
 });
