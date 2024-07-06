@@ -55,6 +55,7 @@ const vm = new Vue({
     },
     watch: {
         'sku.code': async function (code) {
+            this.sku.code = code.trim();
             this.album.code = code.slice(0, 3);
         },
         tag: async function(tag) {
