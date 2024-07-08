@@ -24,6 +24,7 @@ const vm = new Vue({
 		currentPage: 1,
 		pageCount: 1,
 		isPaginationDisabled: false,
+		defaultCover: '/factory/static/img/default-album-cover.svg'
 	},
 	mounted: function() {
 		const vm = this;
