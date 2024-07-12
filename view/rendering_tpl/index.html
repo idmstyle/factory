@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <title>效果图模板</title>
+		<link href="../../static/favicon-256.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="../../static/favicon-256.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="../../static/css/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            /* #app-header .menu-container li:hover,#app-header .menu-container li.hover{background-color: white;}
+            #app-header .menu-container li:hover a,#app-header .menu-container li.hover a{color: black;} */
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+            /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
+        </style>
+        <link rel="stylesheet" href="index.css">
+	</head>
+	<body>
+        <div id="app" v-cloak v-loading="isLoading">
+            <el-container v-cloak style="height:100%;">
+                <el-aside width="270px" style="background-color:white;">
+                    <el-container>
+                        <el-header height="39px" style="border-bottom:1px solid #eee; display: flex; flex-direction: row;">
+                            <div style="line-height: 39px;font-size: 14px; flex-grow: 1;">效果图模板</div>
+                            <div style="width: 20px; line-height: 39px;">
+                                <i v-on:click="handleShowNewItemDialog" class="el-icon el-icon-plus" style="font-size: 16px; cursor: pointer;"></i>
+                            </div>
+                        </el-header>
+                        <el-main style="padding:10px 10px 10px 10px; ">
+                            <el-form size="mini" v-on:submit.native.prevent label-width="68px" label-position="right">
+                                <el-form-item label="代码">
+                                    <el-input v-model="params.code" placeholder="相册代码" v-on:keyup.enter.native="handleSearch"></el-input>
+                                </el-form-item>
+                                <el-form-item label="名称">
+                                    <el-input v-model="params.name" placeholder="相册名称或者标题" v-on:keyup.enter.native="handleSearch"></el-input>
+                                </el-form-item>
+                                <el-form-item label="标签">
+                                    <el-input v-model="params.tag" placeholder="标签" v-on:keyup.enter.native="handleSearch"></el-input>
+                                </el-form-item>
+                                <el-form-item label="描述">
+                                    <el-input v-model="params.desc" placeholder="描述" v-on:keyup.enter.native="handleSearch"></el-input>
+                                </el-form-item>
+                                <el-form-item label=" ">
+                                    <el-button plain v-on:click="handleSearch">搜索</el-button>
+                                    <el-button v-on:click="handleResetSearchParams">清空</el-button>
+                                </el-from-item>
+                            </el-form>
+                        </el-main>
+                    </el-container>
+                </el-aside>
+                <el-container style="margin-left:10px;">
+                    <el-header class="content-header" id="frame-header" height="40px" shadow="always">
+                        <el-col :span="14">
+                            <el-form :inline="true" size="mini" v-on:submit.native.prevent>
+                                <!-- <el-form-item>
+                                    <el-button plain v-on:click="handleShowNewAlbumDialog" style="width:100%">新建</el-button>
+                                </el-form-item> -->
+                                <el-form-item>
+                                    <el-pagination small layout="prev, next" :current-page.sync="params.page" v-on:current-change="handleCurrentPageChange" :total="100" :page-count="pageCount" :disabled="isPaginationDisabled">
+                                    </el-pagination>
+                                </el-form-item>
+                                <el-form-item>
+                                    <span style="color:black;">第 <{params.page}> 页</span>
+                                </el-form-item>
+                            </el-form>
+                            </el-col>
+                            <el-col :span="10"></el-col>
+                    </el-header>
+                    <el-main id="frame-main" :class="{loading: isAlbumLoading}" v-cloak>
+                        <el-table :data="items" size="mini" :stripe="true" :highlight-current-row="true" row-key="id">
+                            <el-table-column prop="id" label="编号" width="180"></el-table-column>
+                            <el-table-column prop="code" label="代码" width="180"></el-table-column>
+                            <el-table-column prop="cover" label="封面" width="180">
+                                <template slot-scope="scope">
+                                    <el-image :src="scope.row.cover" :preview-list="[scope.row.cover]"></el-image>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="name" label="名称" width="180"></el-table-column>
+                            <el-table-column prop="tag" label="标签" width="180"></el-table-column>
+                            <el-table-column prop="desc" label="描述" width="180"></el-table-column>
+                            <el-table-column label="操作">
+                                <template slot-scope="scope">
+                                    <el-link :href="detailLink(scope.row.id)" type="primary" :underline="false" target="_blank">详情</el-link>
+                                    <!-- <el-link type="success" :underline="false">印花绑定</el-link> -->
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-main>
+                </el-container>
+            </el-container>
+            
+            <el-dialog v-cloak title="新建模板" :visible.sync="editFormVisible" width="380px">
+                <el-form ref="edit-form" :model="current" label-width="90px" size="mini">
+                    <el-form-item label="代码">
+                        <el-input v-model="current.code" placeholder="必填项"></el-input>
+                    </el-form-item>
+                    <el-form-item label="名称">
+                        <el-input v-model="current.name" placeholder="必填项"></el-input>
+                    </el-form-item>
+                    <el-form-item label="标签">
+                        <el-input v-model="current.tag" placeholder="非必填项"></el-input>
+                    </el-form-item>
+                    <el-form-item label="描述">
+                        <el-input type="textarea" v-model="current.desc" placeholder="非必填项"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button v-on:click="editFormVisible = false" size="mini">取 消</el-button>
+                    <el-button type="primary" v-on:click="hanleSaveNewItem" size="mini">确 定</el-button>
+                </div>
+            </el-dialog>
+        </div>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script type="text/javascript" src="../../static/js/index.js?v=0.01"></script>
+        <script type="text/javascript" src="index.js?v=0.01"></script>
+	</body>
+</html>

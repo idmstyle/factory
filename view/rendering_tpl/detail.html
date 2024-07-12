@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="version" content ="?v=0.01">
+        <title>效果图模板详情</title>
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="favicon.ico" rel="icon"/>
+        <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link rel="stylesheet" href="../../static/css/index.css?v=0.01"/>
+        <style type="text/css">
+            *{padding: 0; margin: 0; font-size: 12px;}
+            html{zoom:1;}
+            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
+            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
+            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
+            #app{display: flex; flex-direction: column;}
+            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
+            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
+            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
+            #app-header .menu-container ul{white-space: nowrap;}
+            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
+            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
+            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
+            #app-header .menu-container li:hover{background-color: white;}
+            #app-header .menu-container li:hover a{color: black;}
+            #app-content{flex-grow: 1; overflow: hidden;}
+        </style>
+        <link rel="stylesheet" href="detail.css">
+	</head>
+	<body>
+        <div id="app" v-cloak>
+            <div ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" style="height:100%;">
+                <el-container id="main-container" v-cloak>
+                    <el-aside width="280px" style="height: 100%; background-color:white;">
+                        <div class="section">
+                            <div class="section-header" class="clearfix">
+                                <span style="font-size: 12px;">模板详情</span>
+                            </div>
+                            <div class="section-body">
+                                <el-form :inline="false" :model="resource" size="mini" label-width="48px">
+                                    <el-form-item label="短代码">
+                                        <el-input v-model="resource.code" placeholder="自定义短代码" value=""></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="名称">
+                                        <el-input v-model="resource.name" autosize placeholder="相册的名称" v-on:blur="handleUpdateResource"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="标签">
+                                        <el-input v-model="resource.tag" placeholder="非必填" v-on:blur="handleUpdateResource"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="描述">
+                                        <el-input type="textarea" v-model="resource.desc" autosize placeholder="非必填" v-on:blur="handleUpdateResource"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                        </div>
+                    </el-aside>
+                    <el-container>
+                        <el-aside width="480px">
+                            <el-container style="padding:0 10px;">
+                                <el-header class="section-header content-header" height="40px" style="user-select: none;">
+                                    <el-row style="width:100%;">
+                                        <el-col :span="14">
+                                            <el-form size="mini" :inline="true">
+                                                <el-form-item>
+                                                    <el-upload :action="uploadURL"
+                                                        multiple
+                                                        :headers="uploadHeaders"
+                                                        name="file"
+                                                        accept=".png"
+                                                        :on-success="handleUploadSuccess"
+                                                        :data="uploadData"
+                                                        :file-list="files"
+                                                        :show-file-list="false">
+                                                        <el-button size="mini" type="primary">上传图片</el-button>
+                                                    </el-upload>
+                                                </el-form-item>
+                                            </el-form>
+                                        </el-col>
+                                        <el-col :span="10" style="text-align:right;">
+                                        </el-col>
+                                    </el-row>
+                                </el-header>
+                                <el-main style="overflow:hidden; padding:0; background-color: white;">
+                                    <ul id="design-list" v-if="images.length > 0" style="padding: 0 10px 10px 10px;">
+                                        <template v-for="(image,index) of images" >
+                                            <li class="design-item" :class="image.isActive ? 'active' : ''" v-if="!image.isDirectory" style="width:100px;" v-on:click="handleImageSelect(index, image)">
+                                                <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
+                                                    <!-- fit="contain" style="width: 100%; height: 100%;" 为确保图片能够按比例显示，这两个样式都要保留 -->
+                                                    <el-image :id="'image-'+image.name" :src="image.url" fit="contain" style="width: 100%; height: 100%;"></el-image>
+                                                </p>
+                                                <p class="design-name" style="font-size:12px; width:100%;">
+                                                    <span class="editable-text" style="font-size:12px;">
+                                                        <{image.name}>
+                                                    </span>
+                                                </p>
+                                            </li>
+                                            
+                                            <li class="design-item" v-else style="width: 100px;" :style="zoom">
+                                                <a v-on:click="handleOpenChildFolder(image)" style="text-decoration: none; color:black;">
+                                                    <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
+                                                        <el-image src="static/img/envelope_files_folder_interface_office_icon.png" fit="contain" style="width: 70%; height: 70%; margin-top:18px;"></el-image>
+                                                    </p>
+                                                    <p class="design-name" style="width: 100%;">
+                                                        <span style="font-size:12px;"><{image.name}></span>
+                                                    </p>
+                                                </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                    <el-empty class="design-list-empty" v-else description="图片库空空如也"></el-empty>
+                                </el-main>
+                            </el-container>
+                        </el-aside>
+                        <el-container style="background-color: white;">
+                            <el-header class="section-header content-header" height="40px" style="user-select: none;">
+                                <span style="font-size: 12px; color:black;">图片详情</span>
+                            </el-header>
+                            <el-main style="padding:0;">
+                                <el-table :data="currentImage.prints" size="mini" empty-text="请在左侧选择图片">
+                                    <el-table-column prop="left" label="X坐标">
+                                        <template slot-scope="scope">
+                                            <el-input size="mini" v-model="scope.row.left" placeholder="请输入X坐标" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="top" label="Y坐标">
+                                        <template slot-scope="scope">
+                                            <el-input size="mini" v-model="scope.row.top" placeholder="请输入Y坐标" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="width" label="宽度">
+                                        <template slot-scope="scope">
+                                            <el-input size="mini" v-model="scope.row.width" placeholder="请输入宽度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="height" label="高度">
+                                        <template slot-scope="scope">
+                                            <el-input size="mini" v-model="scope.row.height" placeholder="请输入高度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="rotate" label="旋转角度">
+                                        <template slot-scope="scope">
+                                            <el-input size="mini" v-model="scope.row.rotate" placeholder="请输入旋转角度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="watermark" label="水印">
+                                        <template slot-scope="scope">
+                                            <el-input size="mini" v-model="scope.row.watermark" placeholder="请选择水印" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column label="操作">
+                                        <template slot-scope="scope" v-if="scope.row.left > 0">
+                                            <i class="el-icon-copy-document el-icon-button" v-on:click="handlePrintClone(scope.$index, scope.row)" title="复制"></i>
+                                            <el-popconfirm
+                                                width="100"
+                                                cancel-button-text='取消'
+                                                confirm-button-text='确认'
+                                                icon="el-icon-warning"
+                                                :hide-icon="true"
+                                                title="操作无法撤销，确认删除吗？"
+                                                v-on:confirm="handlePrintDelete(scope.$index, scope.row)">
+                                                <i class="el-icon-delete el-icon-button" slot="reference" style="color: red;" title="删除"></i>
+                                            </el-popconfirm>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-main>
+                        </el-container>
+                    </el-container>
+                </el-container>
+                <el-drawer
+                    title="图片详情"
+                    size="240px"
+                    :visible.sync="imageDetailVisible"
+                    direction="rtl">
+                    <div style="padding: 0 10px;">
+                        <el-form size="mini" v-if="currentImage" label-position="right" label-width="60px">
+                            <el-form-item label="名称">
+                                <el-input v-model="currentImage.name" v-on:change="handleImageUpdate"></el-input>
+                            </el-form-item>
+                            <el-form-item label="标签">
+                                <el-select v-model="currentImage.tag" size="mini" v-on:change="handleImageUpdate">
+                                    <el-option key="圆形" label="圆形" value="圆形"></el-option>
+                                    <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
+                                    <el-option key="25x25心" label="25x25心" value="25x25心"></el-option>
+                                    <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="描述">
+                                <el-input type="textarea" v-model="currentImage.desc" v-on:change="handleImageUpdate" placeholder="为图片添加描述内容，后期将用于图片搜索"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" v-on:click="handleSetAsAlbumCover">设为封面</el-button>
+                                <el-button type="danger" v-on:click="handleDeleteImage">删除</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-drawer>
+            </div>
+        </div>
+        <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
+        <script type="text/javascript" src="../../static/js/index.js?v=0.01"></script>
+        <script src="detail.js?v=0.01"></script>
+	</body>
+</html>
