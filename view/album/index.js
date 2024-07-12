@@ -76,7 +76,14 @@ const vm = new Vue({
 				if (this.pageCount == 1) this.isPaginationDisabled = true;
 			}
 			
-			this.albums = result.data;
+			let albums = result.data;
+			for(let album of albums) {
+				if (album.cover && (-1 == album.cover.indexOf('_160x160') && (-1 == album.cover.indexOf('.svg')))) {
+					album.cover = album.cover + '_160x160.png';
+				}
+			}
+
+			this.albums = albums;
 			this.isAlbumLoading = false;
 		},
 		handleSearch: async function () {
