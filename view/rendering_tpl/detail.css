@@ -29,3 +29,13 @@ html,body{font-size: 10px;}
 .section{display: flex; flex-direction: column;}
 .section-header{ height: 40px; line-height: 40px; font-size: 12px; border-bottom: 1px solid #eee; padding: 0 10px; display: flex; background-color: white; }
 .section-body{padding: 10px; flex-grow: 1;}
+
+#water-list{background-color: white; /* display: flex; flex-wrap: wrap; justify-content: flex-start; align-content: flex-start;*/}
+#water-list *{font-family: 'Noto Serif','HarmonyOS Sans', 'HarmonyOS Sans SC', 'HarmonyOS Sans Net', 'HarmonyOS Sans SC Net'!important;}
+#water-list .design-item{display:inline-block; width:18.8rem; border:1px solid #eee; list-style:none; margin: 0.8rem 0.8rem 0.1rem 0; border-radius: 5px;}
+#water-list .design-item .design-image-wrapper{width:100%; /*height:18.8rem;*/ text-align: center; background-color: #eee;}
+#water-list .design-image-wrapper img{width: 80%; height: 80%; margin-top: 10%;}
+#water-list .design-item .design-name{width:18.8rem; height:3.6rem; line-height: 3.6rem; text-align:center; font-size:1.8rem; font-weight: 400;}
+#water-list .design-item.hidden{visibility: hidden;}
+#water-list .editable-text, #water-list .design-name .unit-name{font-size: 1.4rem;}
+#water-list .editable-text:focus{padding: 1rem 1.5rem;}

@@ -16,6 +16,10 @@ const vm = new Vue({
         imageDetailVisible: false,
         currentImage: {},
         currentImageIndex: null,
+        watermarks: [],
+        waterSelectorDialogVisible: false,
+        currentPrint: {},
+        currentPrintIndex: null
     },
     mounted: async function () {
         const resourceId = getURLSearchParams('id');
@@ -150,7 +154,21 @@ const vm = new Vue({
         },
         hideDeletePopover: function (index) {
             this.printDeletePopoverVisible = false;
-        }
+        },
+        handleWaterSelectorDialogOpened: async function () {
+            const response = await core.axios.get('api/rendering_watermarks');
+            this.watermarks = response.data;
+        },
+        handleWaterSelected: function(index, image) {
+            this.currentPrint.watermark = image.url;
+            this.waterSelectorDialogVisible = false;
+            this.handleImageUpdate();
+        },
+        handleShowWaterSelector(index, row){
+            this.waterSelectorDialogVisible = true;
+            this.currentPrintIndex = index;
+            this.currentPrint = row;
+        },
 	}
 });
 

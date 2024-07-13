@@ -144,9 +144,17 @@
                                             <el-input size="mini" v-model="scope.row.rotate" placeholder="请输入旋转角度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
                                         </template>
                                     </el-table-column>
-                                    <el-table-column prop="watermark" label="水印">
+                                    <el-table-column prop="watermark" label="水印" width="380px">
                                         <template slot-scope="scope">
-                                            <el-input size="mini" v-model="scope.row.watermark" placeholder="请选择水印" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                            <el-input size="mini" v-model="scope.row.watermark" placeholder="请选择水印" v-on:change="handleImageUpdate(scope.$index)">
+                                                <i 
+                                                slot="suffix"
+                                                title="从相册中选择"
+                                                class="el-icon-folder-opened el-input__icon"
+                                                v-on:click="handleShowWaterSelector(scope.$index, scope.row)"
+                                                style="cursor: pointer;">
+                                            </i>
+                                            </el-input>
                                         </template>
                                     </el-table-column>
                                     <el-table-column label="操作">
@@ -169,34 +177,30 @@
                         </el-container>
                     </el-container>
                 </el-container>
-                <el-drawer
-                    title="图片详情"
-                    size="240px"
-                    :visible.sync="imageDetailVisible"
-                    direction="rtl">
-                    <div style="padding: 0 10px;">
-                        <el-form size="mini" v-if="currentImage" label-position="right" label-width="60px">
-                            <el-form-item label="名称">
-                                <el-input v-model="currentImage.name" v-on:change="handleImageUpdate"></el-input>
-                            </el-form-item>
-                            <el-form-item label="标签">
-                                <el-select v-model="currentImage.tag" size="mini" v-on:change="handleImageUpdate">
-                                    <el-option key="圆形" label="圆形" value="圆形"></el-option>
-                                    <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
-                                    <el-option key="25x25心" label="25x25心" value="25x25心"></el-option>
-                                    <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item label="描述">
-                                <el-input type="textarea" v-model="currentImage.desc" v-on:change="handleImageUpdate" placeholder="为图片添加描述内容，后期将用于图片搜索"></el-input>
-                            </el-form-item>
-                            <el-form-item>
-                                <el-button type="primary" v-on:click="handleSetAsAlbumCover">设为封面</el-button>
-                                <el-button type="danger" v-on:click="handleDeleteImage">删除</el-button>
-                            </el-form-item>
-                        </el-form>
+                <el-dialog title="选择水印" :visible.sync="waterSelectorDialogVisible" custom-class="image-selector-dialog" v-on:opened="handleWaterSelectorDialogOpened" v-cloak>
+                    <div style="height:440px; overflow-y:auto;">
+                        <ul id="water-list" v-if="watermarks.length>0">
+                            <template v-for="(image, index) of watermarks" >
+                                <li class="design-item" v-if="!image.hidden" v-on:click="handleWaterSelected(index, image)" style="cursor:pointer;">
+                                    <p class="design-image-wrapper"><img :src="image.url" /></p>
+                                    <p class="design-name">
+                                        <span class="editable-text">
+                                            <{image.name}>
+                                        </span>
+                                    </p>
+                                </li>
+                                <li class="design-item hidden" v-else>
+                                    <p class="design-image-wrapper"><img src="" /></p>
+                                    <p class="design-name"></p>
+                                </li>
+                            </template>
+                        </ul>
+                        <el-empty class="design-list-empty" v-else description="图片库空空如也"></el-empty>
                     </div>
-                </el-drawer>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button v-on:click="waterSelectorDialogVisible = false" size="mini">取 消</el-button>
+                    </div>
+                </el-dialog>
             </div>
         </div>
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
