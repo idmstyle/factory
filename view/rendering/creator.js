@@ -190,16 +190,16 @@ function combineImagesByCanvas(images) {
  * 文件名示例：22300101-模特图
  * 文件名格式：主题编号（223） + 模版套件编号（001） + 产品在当前 SKU 组中的序号（01）
  * 
- * @param {*} suitCode 
- * @param {*} templateName 
+ * @param {*} tplCode 
+ * @param {*} tplName 
  * @param {*} index 
  * @returns 
  */
- function createImageTitle(suitCode, templateName, index = 0) {
+ function createImageTitle(tplCode, tplName, index = 0) {
     index = String(index).padStart(2, '0');
 
-    let title = suitCode + index;
-    if (templateName.length > 0) title += "-" + templateName;
+    let title = tplCode + index;
+    if (tplName.length > 0 && tplName != '主图') title += "-" + tplName;
 
     return title;
 };

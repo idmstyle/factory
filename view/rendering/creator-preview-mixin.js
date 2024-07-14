@@ -26,7 +26,6 @@ var previewMixin = {
             const vm = this;
             // 页面加载完成时，会自动触发模版列表的selection，这时源文件为空，不需要生成预览图片
             if(this.selectedSources.length == 0 || this.selectedTpls.length == 0) return true;
-            console.log('start');
             const options = {
                 themeCode: vm.options.themeCode,
                 albumCode: this.options.albumCode,
@@ -36,7 +35,7 @@ var previewMixin = {
                 imageSize: vm.options.imageSize
             };
 
-            const images = await createImages(vm.selectedTpls, vm.selectedSources, options);
+            const images = await createImages(vm.selectedTpls, vm.sources, options);
             vm.previews = images;
         },
     }

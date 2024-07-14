@@ -6,20 +6,16 @@ function batchCreate(tpls, srcs, options) {
     srcs = clone(srcs);
     options = clone(options);
 
-    console.log('srcs:', srcs);
-
     if (tpls.length === 0 || srcs.length === 0) return [];
 
     let images = [];
     for(let tpl of tpls) {
         for(let tplImage of tpl.images) {
             let sources = getSources(srcs, options.create_model, tplImage.tag, tplImage.prints.length, tpl.isMixed);
-            console.log('sources:', sources);
             let newImages = createImages_H(tpl.code, tplImage, sources, tpl.isMixed);
             images = images.concat(newImages);
         }
     }
-
     return images;
 }
 
@@ -111,13 +107,6 @@ function createImages_H(tplCode, originalTplImage, originalSources, isMixed = fa
     return images;
 }
 
-function createImageTitle(tplCode, imageName, index = 0) {
-    index = String(index).padStart(2, '0');
-    let title = tplCode + index;
-    if (imageName.length > 0) title += "-" + imageName;
-    return title;
-}
-
 function getOptions(input = null) {
     options = {theme_code: '200', create_model: 0, image_size: '8x'};
 
@@ -132,7 +121,6 @@ function getSources(sources, createModel, tag, printCount = 1, isMixed = false) 
     if (isMixed) {
         let count = sources.length % printCount;
         if (count) {
-            // sources = sources.concat(sources, )
             sources = sources.fill(sources[-1], sources.length, printCount - count);
         }
     } else {
@@ -142,8 +130,6 @@ function getSources(sources, createModel, tag, printCount = 1, isMixed = false) 
     }
 
     if (createModel == 0 && tag != 'SKU') sources = sources.slice(0, printCount);
-
-    console.log('sources:', sources);
     return sources;
 }
 

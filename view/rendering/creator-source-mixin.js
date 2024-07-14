@@ -106,17 +106,16 @@ var sourceMixin = {
             }
             files = undefined;
             this.updatePreviewImages();
-            // this.selectorDialogVisible = false;
             return true;
         },
-        srcSourceClearAll: function() {
-            this.selectorImages.forEach(image => image.isActive = false);
-            this.srcUpdateSourceImages();
+        handleSourceClearAll: function() {
+            this.album.images.forEach(image => image.isActive = false);
+            this.updateSources();
             this.$forceUpdate();
         },
-        srcSourceSelectAll: function () {
-            this.selectorImages.forEach(image => image.isActive = true);
-            this.srcUpdateSourceImages();
+        handleSourceSelectAll: function () {
+            this.album.images.forEach(image => image.isActive = true);
+            this.updateSources();
             this.$forceUpdate();
         },
         handleSourceLoad: function(event, source, index){
