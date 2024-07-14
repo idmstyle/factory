@@ -58,9 +58,13 @@ const vm = new Vue({
         selectedImages: [],
         selectedImageCache: [],
         // -------------------------------------------------------
-        albumId: ''
+        albumId: '',
+        watermarks: []
 	},
-	mounted: async function() {},
+	mounted: async function() {
+        const response = await core.axios.get('api/rendering_watermarks');
+        this.watermarks = response.data;
+    },
 	methods: {
         handleSourceChange: function() {
             this.sourceLoading = true;

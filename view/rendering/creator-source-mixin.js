@@ -2,19 +2,35 @@ var sourceMixin = {
     data: {
         srcTheme: null,
         srcThemes: [],        
-        srcThemeQueryLoading: false,
+        albumQueryLoading: false,
+        albums: [],
+        album: {},
+        albumImageTag: '圆形',
+        sources: [],
+        selectedSources: []
     },
     watch: {
-        srcTheme: function (theme) {
-            if (theme) {
-                this.options.themeCode = theme.code;
-                // this.diaGetThemeImages();
-                // this.albumImageURL = `view/album-image/index.html?album-id=${theme._id}`;
-                this.albumId = theme._id;
-            }
+        album: function (album) {
+            if (!album) return ;
+
+            this.options.themeCode = album.code;
+            this.options.albumCode = album.code;
+            this.albumId = album.id;
+            this.loadAlbumImages();
+        },
+        albumImageTag: function (tag) {
+            this.loadAlbumImages();
         }
     },
     methods: {
+        loadAlbumImages: async function () {
+            const params = {
+                albumId: this.album.id,
+                tag: this.albumImageTag
+            };
+            const response = await core.axios.get('api/album_images', {params: params});
+            this.album.images = response.data;
+        },
         handleSourceClear: function() {
             this.clearSources();
             this.selectorImages = [];
@@ -29,6 +45,25 @@ var sourceMixin = {
             this.sources = [];
             this.previews = [];
             this.sourceImageUrls = [];
+            this.selectedSources = [];
+        },
+        albumQuery: async function (query) {
+            if (query == '') {
+                this.albums = [];
+                return ;
+            }
+
+            this.albumQueryLoading = true;
+            const params = {
+                code: query
+            }
+            const response = await core.axios.get('api/albums', {params: params});
+            const albums = response.data.data;
+            for(let album of albums) {
+                album.images = [];
+            }
+            this.albums = albums;
+            this.albumQueryLoading = false;
         },
         srcThemeQuery: async function (query) {
             if (query == '') {
@@ -52,21 +87,21 @@ var sourceMixin = {
             this.srcThemes = response.data;
             this.srcThemeQueryLoading = false;
         },
-        srcImageSelect: function (index, image) {
+        handleAlbumImageSelected: function (index, image) {
             image.isActive = !image.isActive;
-            this.$set(this.selectorImages, index, image);
-            this.srcUpdateSourceImages();
+            this.$set(this.album.images, index, image);
+            this.updateSources();
         },
-        srcUpdateSourceImages: function () {
+        updateSources: function () {
             let files = [];
-            this.selectorImages.forEach(image => image.isActive && files.push(image));
+            this.album.images.forEach(image => image.isActive && files.push(image));
             this.sourceCount = files.length;
             
             this.clearSources();
             for(const file of files) {
-                file.code = file.basename;
                 this.sourceImages.push(file);
                 this.sources.push(file);
+                this.selectedSources.push(file);
                 this.sourceImageUrls.push(file.url);
             }
             files = undefined;
@@ -93,6 +128,9 @@ var sourceMixin = {
                 this.sourceLoading = false;
                 this.updatePreviewImages();
             }
+        },
+        handleResourceLoad: function(event, resource){
+            resource['targetId'] = event.target.id;
         },
         handleSourceCategoryCommand: function (command) {
             this.diaSourceCategory = command;

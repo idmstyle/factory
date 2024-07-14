@@ -45,22 +45,22 @@
                             </div>
                             <div class="container-item-main" style="padding: 10px;">
                                 <el-form size="mini" :inline="false" label-width="60px">
-                                    <el-form-item label="选择主题">
+                                    <el-form-item label="选择相册">
                                         <el-select
-                                            v-model="srcTheme"
+                                            v-model="album"
                                             filterable
                                             remote
                                             default-first-option
                                             reserve-keyword
                                             value-key='id'
                                             placeholder="使用编号或名称查询"
-                                            :remote-method="srcThemeQuery"
-                                            :loading="srcThemeQueryLoading">
+                                            :remote-method="albumQuery"
+                                            :loading="albumQueryLoading">
                                             <el-option
-                                                v-for="theme in srcThemes"
-                                                :key="theme.id"
-                                                :label="theme.code + ' ' + theme.name"
-                                                :value="theme">
+                                                v-for="album in albums"
+                                                :key="album.id"
+                                                :label="album.code + ' ' + album.name"
+                                                :value="album">
                                             </el-option>
                                         </el-select>
                                     </el-form-item>
@@ -109,13 +109,12 @@
                         <el-main id="theme-image-container" style="padding: 0; background: white;display:flex;flex-direction: column;">
                             <div class="container-item-header">
                                 <div class="container-item-title">相册</div>
-                                <!-- <el-select v-model="diaSourceCategory" size="mini" placeholder="按形状筛选" style="width:100px; margin-right:20px;">
-                                    <el-option key="全部类型" label="全部类型" :value="null"></el-option>
+                                <el-select v-model="albumImageTag" size="mini" placeholder="按形状筛选" style="width:100px; margin-right:20px;">
                                     <el-option key="圆形" label="圆形" value="圆形"></el-option>
                                     <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
                                     <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
-                                </el-select> -->
-                                <template v-if="!!srcTheme">
+                                </el-select>
+                                <template>
                                     <!-- <el-dropdown v-on:command="handleSourceCategoryCommand" size="mini" style="margin-right:15px;">
                                         <span class="el-dropdown-link">
                                             <{diaSourceCategory ? diaSourceCategory : '全部形状'}><i class="el-icon-arrow-down el-icon--right"></i>
@@ -132,18 +131,20 @@
                                 </template>
                             </div>
                             <div class="container-item-main" style="overflow-y:hidden;">
-                                <iframe id="album-image-iframe" v-if="!!albumId" :src="'album-image/index.html?zoom=0.55&albumId=' + albumId" style="width:100%; height: 100%; overflow: hidden; border: none; padding: 0; margin: 0;"></iframe>
-                                <!-- <ul id="theme-image-list" v-if="selectorImages.length>0" style="height:100%; overflow-y:auto;">
-                                    <template v-for="(image,index) of selectorImages">
+                                <!-- <iframe id="album-image-iframe" v-if="!!albumId" :src="'album-image/index.html?zoom=0.55&albumId=' + albumId" style="width:100%; height: 100%; overflow: hidden; border: none; padding: 0; margin: 0;"></iframe> -->
+                                <ul id="theme-image-list" v-if="!!album.images" style="height:100%; overflow-y:auto;">
+                                    <template v-for="(image,index) of album.images">
                                         <li
-                                            :title="image.basename"
+                                            :title="image.name"
                                             class="design-item"
                                             :class="{ active: image.isActive }"
-                                            v-on:click="srcImageSelect(index, image)"
+                                            v-on:click="handleAlbumImageSelected(index, image)"
                                             style="cursor:pointer;">
-                                            <p class="design-image-wrapper"><img :src="image.url" :alt="image.basename" :id="'source-' + image.basename" /></p>
+                                            <p class="design-image-wrapper">
+                                                <img :src="image.url" :alt="image.name" :id="'source-' + image.id" v-on:load="handleResourceLoad($event, image)" crossorigin="anonymous"/>
+                                            </p>
                                             <p class="design-name">
-                                                <span contenteditable="false" class="editable-text"><{image.basename}></span>
+                                                <span contenteditable="false" class="editable-text"><{image.name}></span>
                                             </p>
                                         </li>
                                         <li class="design-item hidden" v-else>
@@ -152,7 +153,7 @@
                                         </li>
                                     </template>
                                 </ul>
-                                <el-empty class="design-list-empty" v-else description=" " image-size="60"></el-empty> -->
+                                <el-empty class="design-list-empty" v-else description=" " image-size="60"></el-empty>
                             </div>
                         </el-main>
                     </el-container>
@@ -190,21 +191,8 @@
                             </template>
                         </div>
                         <div class="container-item-main">
-                            <el-table :data="tplSuits"
-                                ref="tplSuitsTable"
-                                style="width: 100%;"
-                                row-key="_id"
-                                current-row-key="1"
-                                :highlight-current-row="false"
-                                :show-header="false"
-                                v-on:selection-change="handleSelectionChange">
-                                <el-table-column
-                                    fixed
-                                    type="selection"
-                                    :reserve-selection="true"
-                                    width="30"
-                                    align="center"
-                                    :selectable="isRowSelectable">
+                            <el-table :data="tpls" ref="tplSuitsTable" style="width: 100%;" row-key="id" current-row-key="1" :highlight-current-row="false" :show-header="false" v-on:selection-change="handleTplSelectionChange">
+                                <el-table-column fixed type="selection" :reserve-selection="true" width="30" align="center" :selectable="isRowSelectable">
                                 </el-table-column>
                                 <el-table-column fixed prop="code" label="编号" width="42" align="center">
                                     <template slot-scope="scope">
@@ -215,41 +203,18 @@
                                 <el-table-column label="图片">
                                     <template slot-scope="scope">
                                         <div class="tpl-image-list">
-                                            <div
-                                                v-for="(tpl, index) in scope.row.images"
-                                                class="tpl-image-item"
-                                                style="margin:0; padding:0; border:none;">
-                                                <template v-if="tpl.background">
+                                            <div v-for="(image, index) in scope.row.images" class="tpl-image-item" style="margin:0; padding:0; border:none;">
+                                                <template v-if="image.url">
                                                     <el-image
-                                                        :id="'background-'+scope.row.code+'-'+tpl.name"
-                                                        :data-id="scope.row._id"
-                                                        class="tpl-image" 
-                                                        :src="tpl.background"
-                                                        :preview-src-list="[tpl.background]"
-                                                        v-on:load="handleBackgroundImageLoad($event, tpl)"
-                                                        :title="tpl.name"
-                                                        style="margin:0 2px;">
-                                                    </el-image>
-                                                </template>
-                                                <template v-if="tpl.watermark">
-                                                    <el-image
-                                                        :id="'watermark-'+scope.row.code+'-'+tpl.name"
-                                                        :data-id="scope.row._id"
-                                                        class="tpl-mark"
-                                                        :src="tpl.watermark"
-                                                        v-on:load="handleTplMarkLoad($event, tpl)">
-                                                    </el-image>
-                                                </template>
-                                                <template v-if="tpl.foreground">
-                                                    <el-image
-                                                        :id="'foreground-'+scope.row.code+'-'+tpl.name"
-                                                        :data-id="scope.row._id"
+                                                        :id="'image-' + image.id"
+                                                        :data-id="scope.row.id"
                                                         class="tpl-image"
-                                                        :src="tpl.foreground"
-                                                        :preview-src-list="[tpl.foreground]"
-                                                        v-on:load="handleForegroundImageLoad($event, tpl)"
-                                                        :title="tpl.name"
-                                                        style="margin:0 2px;">
+                                                        :src="image.url"
+                                                        :preview-src-list="[image.url]"
+                                                        v-on:load="handleResourceLoad($event, image)"
+                                                        :title="image.name"
+                                                        style="margin:0 2px;"
+                                                        crossorigin="anonymous">
                                                     </el-image>
                                                 </template>
                                             </div>
@@ -258,8 +223,6 @@
                                 </el-table-column>
                             </el-table>
                         </div>
-                        
-                        
                     </el-aside>
                     <el-main class="content-main" id="preview-container">
                         <div class="container-item" style="display: flex;">
@@ -361,7 +324,17 @@
                 <el-button type="primary" v-on:click="handleSelectorConfirmAll" size="mini">全选 & 确定</el-button>
             </div>
         </el-dialog>
-        
+        <div style="display: none;">
+            <el-image
+                v-for="(watermark, index) of watermarks"
+                :id="'watermark-' + watermark.id"
+                :data-id="'watermark-' + watermark.id"
+                class="tpl-mark"
+                :src="watermark.url"
+                v-on:load="handleResourceLoad($event, watermark)"
+                crossorigin="anonymous">
+            </el-image>
+        </div>
         
         </div>
 
@@ -370,7 +343,7 @@
         <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript"></script>
         <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/clipboard.js/2.0.10/clipboard.min.js" type="application/javascript"></script>
         <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/clipboard-polyfill/4.0.0-rc1/main/clipboard-polyfill.min.js" type="application/javascript"></script>
-        <script type="text/javascript" src="static/js/index.js?v=0.01"></script>
+        <script type="text/javascript" src="../static/js/index.js?v=0.01"></script>
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/FileSaver.js/2.0.5/FileSaver.min.js" type="application/javascript"></script>
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/html-to-image/1.9.0/html-to-image.min.js" type="application/javascript"></script>
         

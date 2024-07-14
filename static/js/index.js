@@ -126,3 +126,15 @@ const core = {
 }
 
 core.init();
+
+/**
+ * 快捷读取 url 查询字符串中的参数
+ * 
+ * @param {string} key 
+ * @param {any} defaultTo 
+ * @returns string | any
+ */
+function getURLSearchParams(key, defaultTo = null) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(key) || defaultTo;
+}

@@ -25,19 +25,18 @@ var previewMixin = {
         updatePreviewImages: async function(loading = true) {
             const vm = this;
             // 页面加载完成时，会自动触发模版列表的selection，这时源文件为空，不需要生成预览图片
-            console.log('selectedImages:', vm.selectedImages);
-            // if(vm.sources.length <= 0) return true;
-            if(vm.selectedImages.length <= 0) return true;
-            
+            if(this.selectedSources.length == 0 || this.selectedTpls.length == 0) return true;
+            console.log('start');
             const options = {
                 themeCode: vm.options.themeCode,
+                albumCode: this.options.albumCode,
                 composeType: vm.options.composeModel,
                 baseURL: vm.tplPath,
                 createModel: vm.options.composeModel, 
                 imageSize: vm.options.imageSize
             };
 
-            const images = await createImages(vm.selectedTplSuits, vm.selectedImages, options);
+            const images = await createImages(vm.selectedTpls, vm.selectedSources, options);
             vm.previews = images;
         },
     }
@@ -59,29 +58,19 @@ function composeImagesByCanvas(imagesToDraw) {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const frameWindow = document.getElementById('album-image-iframe').contentWindow;
     for(let image of imagesToDraw) {
-        console.log('image:', image);
-        let dom;
-        if (!image.id.startsWith('image-')) {
-            dom = document.getElementById(image.id);
-            console.log('tpl dom:', image.id);
+        const dom = document.getElementById(image.targetId);
+        if (image.rotate == '0') {
+            ctx.drawImage(dom, parseFloat(image.left), parseFloat(image.top), parseFloat(image.width), parseFloat(image.height));
         } else {
-            dom = frameWindow.document.getElementById(image.id);
-            console.log('frame dom:', image.id);
-        }
-        
-        if (image.rotate == 0) {
-            ctx.drawImage(dom, image.left, image.top, image.width, image.height);
-        } else {
-            ctx.translate(image.left, image.top); // 549, 674
-            ctx.rotate(image.rotate * Math.PI / 180);
+            ctx.translate(parseFloat(image.left), parseFloat(image.top)); // 549, 674
+            ctx.rotate(parseFloat(image.rotate) * Math.PI / 180);
 
-            ctx.drawImage(dom, 0, 0, image.width, image.height);
+            ctx.drawImage(dom, 0, 0, parseFloat(image.width), parseFloat(image.height));
 
             // 恢复设置（恢复的步骤要跟你修改的步骤向反）
-            ctx.rotate(-1 * image.rotate * Math.PI / 180);
-            ctx.translate(-1 * image.left, -1 * image.top);
+            ctx.rotate(-1 * parseFloat(image.rotate) * Math.PI / 180);
+            ctx.translate(-1 * parseFloat(image.left), -1 * parseFloat(image.top));
         }
     }
 
@@ -89,17 +78,15 @@ function composeImagesByCanvas(imagesToDraw) {
 }
 
 
-async function createImages(suits, sources, customOptions) {
+async function createImages(tpls, sources, customOptions) {
     let userOptions = {
         create_model: customOptions.composeType,
         theme_code: customOptions.themeCode,
         image_size: customOptions.imageSize,
     };
 
-    const data = {"templates": suits, "sources": sources, "options": userOptions};
-    // const response = await axios.post('/admin/product/creator/image/batch-create', data);
-    // const images = response.data;
-    let images = batchCreate(suits, sources, userOptions);
+    const data = {"templates": tpls, "tpls": tpls, "sources": sources, "options": userOptions};
+    let images = batchCreate(tpls, sources, userOptions);
     for(let image of images)
     {
         image.isActive = true;
