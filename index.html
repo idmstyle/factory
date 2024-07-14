@@ -15,7 +15,7 @@
             /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
             [v-cloak]{display:none; background-image:url( 'static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
             #app{display: flex; flex-direction: column;}
-            #app-header{padding:0 10px; height: 24px; min-height:24px; line-height: 24px; overflow: hidden; /*background-color: #363636;*/background-color: #363636; display: flex; border-bottom: 1px solid #eee;}
+            #app-header{padding:0 10px; height: 24px; min-height:24px; line-height: 24px; overflow: hidden; /*background-color: #363636;*/background-color: #363636; display: flex; /*border-bottom: 1px solid #eee;*/}
             #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
             #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
             #app-header .menu-container ul{white-space: nowrap;}
@@ -63,10 +63,7 @@
                             <a nofollow href="index.html?_path_=view/album/index.html">我的相册</a>
                         </li>
                         <li>
-                            <a nofollow href="index.html?_path_=view/template/index.html">产品模板</a>
-                        </li>
-                        <li>
-                            <a nofollow href="index.html?_path_=view/shape/index.html">印花模板</a>
+                            <a nofollow href="index.html?_path_=view/rendering_tpl/index.html">效果图模板</a>
                         </li>
                         <li>
                             <a nofollow href="index.html?_path_=view/rendering/creator.html">生成效果图</a>
@@ -74,9 +71,9 @@
                         <li>
                             <a nofollow href="index.html?_path_=view/rendering/album.html">效果图相册</a>
                         </li>
-                        <!-- <li>
-                            <a nofollow href="index.html?_path_=view/settings/database.html">数据管理</a>
-                        </li> -->
+                        <li>
+                            <a nofollow href="index.html?_path_=view/shape/index.html">印花模板</a>
+                        </li>
                         <li>
                             <a nofollow href="index.html?_path_=view/carton-record/index.html">装箱记录</a>
                         </li>
@@ -88,11 +85,16 @@
                 <div class="userinfo-container"></div>
             </div>
             <div id="app-content" class="content-main">
-                <!-- 当初始 src=about:blank 时，会出现 updateDocumentTitle 未定义的错误，不明白原因 -->
-                <iframe id="topframe-main" src="#" style="width:100%; height:100%; border: none;padding:0; margin:0;overflow: hidden;" onload="updateDocumentTitle(event)"></iframe>
+                <iframe id="topframe-main" src="" style="width:100%; height:100%; border: none;padding:0; margin:0;overflow: hidden;"></iframe>
             </div>
         </div>
         <script type="text/javascript">
+            // 获取子页面标题，并在当前页面显示
+            document.getElementById('topframe-main').addEventListener('load', function (event) {
+                let title = event.target.contentWindow.document.title;
+                document.title = title;
+            });
+
             const key = '_path_';
             const params = new URLSearchParams(window.location.search);
             const path = params.get(key);
@@ -104,11 +106,6 @@
                 const url = params.size > 0 ? `${path}?${params.toString()}` : path;
                 // iframe重定向
                 if (url) document.getElementById('topframe-main').setAttribute('src', url);
-            }
-
-            function updateDocumentTitle(event) {
-                let title = event.target.contentWindow.document.title;
-                document.title = title;
             }
         </script>
 	</body>
