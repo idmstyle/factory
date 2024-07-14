@@ -94,10 +94,10 @@
                         <el-main style="overflow:hidden;">
                             <ul id="design-list" v-if="images.length > 0">
                                 <template v-for="(image,index) of images" >
-                                    <li class="design-item" :style="zoom" :class="image.isActive ? 'active' : ''" v-if="!image.isDirectory" style="width:100px;" v-on:click="handleImageSelect(index, image)">
+                                    <li class="design-item" :style="zoom" :class="image.isActive ? 'active' : ''" v-if="!image.isDirectory" style="width:100px; cursor: pointer;" v-on:click="handleImageSelect(index, image)">
                                         <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
                                             <!-- fit="contain" style="width: 100%; height: 100%;" 为确保图片能够按比例显示，这两个样式都要保留 -->
-                                            <el-image :id="'image-'+image.name" :src="image.url" fit="contain" style="width: 100%; height: 100%;"></el-image>
+                                            <el-image :id="'image-'+image.name" :src="image.url + '_80x80.png'" fit="contain" style="width: 100%; height: 100%;" title="点击查看图片详情"></el-image>
                                         </p>
                                         <p class="design-name" style="font-size:12px; width:100%;">
                                             <span class="editable-text" style="font-size:12px;"><!-- contenteditable="true" -->
