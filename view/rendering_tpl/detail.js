@@ -19,7 +19,12 @@ const vm = new Vue({
         watermarks: [],
         waterSelectorDialogVisible: false,
         currentPrint: {},
-        currentPrintIndex: null
+        currentPrintIndex: null,
+        availableTags: [
+            {label: '主图', value: 'SKU'},
+            {label: '尺寸图', value: 'SIZE'},
+            {label: '其他', value: 'OTHER'}
+        ]
     },
     mounted: async function () {
         const resourceId = getURLSearchParams('id');
@@ -118,7 +123,7 @@ const vm = new Vue({
                     rotate: 0
                 })
             }
-            const image = JSON.parse(JSON.stringify(this.currentImage));
+            const image = core.structuredClone(this.currentImage);
             image.prints.pop();
             for(let print of image.prints) {
                 for(let key of ['width', 'height', 'left', 'top', 'rotate']) {
@@ -148,7 +153,7 @@ const vm = new Vue({
             }
         },
         handlePrintClone(index, row) {
-            let newRow = JSON.parse(JSON.stringify(row));
+            let newRow = core.structuredClone(row);
             this.currentImage.prints.splice(index, 0, newRow);
             this.handleImageUpdate();
         },
@@ -166,6 +171,7 @@ const vm = new Vue({
         handleWaterSelected: function(index, image) {
             this.currentPrint.watermark_id = image.id;
             this.currentPrint.watermark = image.url;
+            this.currentImage.prints.splice(this.currentPrintIndex, 1, core.structuredClone(this.currentPrint));
             this.waterSelectorDialogVisible = false;
             this.handleImageUpdate();
         },

@@ -122,6 +122,12 @@ const core = {
             let win = window.parent;
             win.location.href = '/auth/login?redirect=' + encodeURIComponent(win.location.href);
         }
+    },
+
+    structuredClone: function (origin, options) {
+        if (typeof structuredClone == 'function') return structuredClone(origin, options);
+
+        return JSON.parse(JSON.stringify(origin));
     }
 }
 

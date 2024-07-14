@@ -85,10 +85,10 @@
                                 <el-main style="overflow:hidden; padding:0; background-color: white;">
                                     <ul id="design-list" v-if="images.length > 0" style="padding: 0 10px 10px 10px;">
                                         <template v-for="(image,index) of images" >
-                                            <li class="design-item" :class="image.isActive ? 'active' : ''" v-if="!image.isDirectory" style="width:100px;" v-on:click="handleImageSelect(index, image)">
+                                            <li class="design-item" :class="image.isActive ? 'active' : ''" v-if="!image.isDirectory" style="width:100px; cursor: pointer;" v-on:click="handleImageSelect(index, image)">
                                                 <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
                                                     <!-- fit="contain" style="width: 100%; height: 100%;" 为确保图片能够按比例显示，这两个样式都要保留 -->
-                                                    <el-image :id="'image-'+image.name" :src="image.url" fit="contain" style="width: 100%; height: 100%;"></el-image>
+                                                    <el-image :id="'image-'+image.name" :src="image.url" fit="contain" style="width: 100%; height: 100%;" title="点击图片编辑详情"></el-image>
                                                 </p>
                                                 <p class="design-name" style="font-size:12px; width:100%;">
                                                     <span class="editable-text" style="font-size:12px;">
@@ -113,67 +113,88 @@
                                 </el-main>
                             </el-container>
                         </el-aside>
-                        <el-container style="background-color: white;">
-                            <el-header class="section-header content-header" height="40px" style="user-select: none;">
-                                <span style="font-size: 12px; color:black;">图片详情</span>
+                        <el-container>
+                            <el-header height="100px" style="padding: 0; background-color: white;">
+                                <el-header class="section-header content-header" height="40px" style="user-select: none;">
+                                    <span style="font-size: 12px; color:black;">图片详情</span>
+                                </el-header>
+                                <el-main>
+                                    <el-form size="mini" label-width="" :inline="true">
+                                        <el-form-item label="名称">
+                                            <el-input v-model="currentImage.name" placeholder="请在左侧选择图片后编辑" v-on:change="handleImageUpdate"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="标签">
+                                            <!-- <el-input v-model="currentImage.tag" placeholder="请在左侧选择图片后编辑"></el-input> -->
+                                             <el-select v-model="currentImage.tag" v-on:change="handleImageUpdate">
+                                                <el-option v-for="item in availableTags" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                                             </el-select>
+                                        </el-form-item>
+                                    </el-form>
+                                </el-main>
                             </el-header>
-                            <el-main style="padding:0;">
-                                <el-table :data="currentImage.prints" size="mini" empty-text="请在左侧选择图片">
-                                    <el-table-column prop="left" label="X坐标">
-                                        <template slot-scope="scope">
-                                            <el-input size="mini" v-model="scope.row.left" placeholder="请输入X坐标" v-on:change="handleImageUpdate(scope.$index)"></el-input>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="top" label="Y坐标">
-                                        <template slot-scope="scope">
-                                            <el-input size="mini" v-model="scope.row.top" placeholder="请输入Y坐标" v-on:change="handleImageUpdate(scope.$index)"></el-input>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="width" label="宽度">
-                                        <template slot-scope="scope">
-                                            <el-input size="mini" v-model="scope.row.width" placeholder="请输入宽度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="height" label="高度">
-                                        <template slot-scope="scope">
-                                            <el-input size="mini" v-model="scope.row.height" placeholder="请输入高度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="rotate" label="旋转角度">
-                                        <template slot-scope="scope">
-                                            <el-input size="mini" v-model="scope.row.rotate" placeholder="请输入旋转角度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="watermark" label="水印" width="380px">
-                                        <template slot-scope="scope">
-                                            <el-input size="mini" v-model="scope.row.watermark" placeholder="请选择水印" v-on:change="handleImageUpdate(scope.$index)">
-                                                <i 
-                                                slot="suffix"
-                                                title="从相册中选择"
-                                                class="el-icon-folder-opened el-input__icon"
-                                                v-on:click="handleShowWaterSelector(scope.$index, scope.row)"
-                                                style="cursor: pointer;">
-                                            </i>
-                                            </el-input>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column label="操作">
-                                        <template slot-scope="scope" v-if="scope.row.left > 0">
-                                            <i class="el-icon-copy-document el-icon-button" v-on:click="handlePrintClone(scope.$index, scope.row)" title="复制"></i>
-                                            <el-popconfirm
-                                                width="100"
-                                                cancel-button-text='取消'
-                                                confirm-button-text='确认'
-                                                icon="el-icon-warning"
-                                                :hide-icon="true"
-                                                title="操作无法撤销，确认删除吗？"
-                                                v-on:confirm="handlePrintDelete(scope.$index, scope.row)">
-                                                <i class="el-icon-delete el-icon-button" slot="reference" style="color: red;" title="删除"></i>
-                                            </el-popconfirm>
-                                        </template>
-                                    </el-table-column>
-                                </el-table>
-                            </el-main>
+                            
+                            <el-container style="padding:0; margin-top: 10px; background-color: white;">
+                                <el-header class="section-header content-header" height="40px" style="user-select: none;">
+                                    <span style="font-size: 12px; color:black;">贴图列表</span>
+                                </el-header>
+                                <el-main>
+                                    <el-table :data="currentImage.prints" size="mini" empty-text="请在左侧选择图片">
+                                        <el-table-column prop="left" label="X坐标">
+                                            <template slot-scope="scope">
+                                                <el-input size="mini" v-model="scope.row.left" placeholder="请输入X坐标" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column prop="top" label="Y坐标">
+                                            <template slot-scope="scope">
+                                                <el-input size="mini" v-model="scope.row.top" placeholder="请输入Y坐标" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column prop="width" label="宽度">
+                                            <template slot-scope="scope">
+                                                <el-input size="mini" v-model="scope.row.width" placeholder="请输入宽度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column prop="height" label="高度">
+                                            <template slot-scope="scope">
+                                                <el-input size="mini" v-model="scope.row.height" placeholder="请输入高度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column prop="rotate" label="旋转角度">
+                                            <template slot-scope="scope">
+                                                <el-input size="mini" v-model="scope.row.rotate" placeholder="请输入旋转角度" v-on:change="handleImageUpdate(scope.$index)"></el-input>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column prop="watermark" label="水印" width="380px">
+                                            <template slot-scope="scope">
+                                                <el-input size="mini" v-model="scope.row.watermark" placeholder="请选择水印" v-on:change="handleImageUpdate(scope.$index)">
+                                                    <i 
+                                                    slot="suffix"
+                                                    title="从相册中选择"
+                                                    class="el-icon-folder-opened el-input__icon"
+                                                    v-on:click="handleShowWaterSelector(scope.$index, scope.row)"
+                                                    style="cursor: pointer;">
+                                                </i>
+                                                </el-input>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="操作">
+                                            <template slot-scope="scope" v-if="scope.row.left > 0">
+                                                <i class="el-icon-copy-document el-icon-button" v-on:click="handlePrintClone(scope.$index, scope.row)" title="复制"></i>
+                                                <el-popconfirm
+                                                    width="100"
+                                                    cancel-button-text='取消'
+                                                    confirm-button-text='确认'
+                                                    icon="el-icon-warning"
+                                                    :hide-icon="true"
+                                                    title="操作无法撤销，确认删除吗？"
+                                                    v-on:confirm="handlePrintDelete(scope.$index, scope.row)">
+                                                    <i class="el-icon-delete el-icon-button" slot="reference" style="color: red;" title="删除"></i>
+                                                </el-popconfirm>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-main>
+                            </el-container>
                         </el-container>
                     </el-container>
                 </el-container>
