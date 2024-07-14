@@ -109,7 +109,6 @@ const vm = new Vue({
             if (isNew) this.images.push(response);
         },
         handleImageUpdate: async function (index) {
-            console.log('index:', index);
             if (index == this.currentImage.prints.length - 1) {
                 this.currentImage.prints.push({
                     left: 0,
@@ -121,6 +120,11 @@ const vm = new Vue({
             }
             const image = JSON.parse(JSON.stringify(this.currentImage));
             image.prints.pop();
+            for(let print of image.prints) {
+                for(let key of ['width', 'height', 'left', 'top', 'rotate']) {
+                    print[key] = parseFloat(print[key])
+                }
+            }
             const response = await core.axios.put(`api/rendering_tpl_images/${image.id}`, image);
             this.$message({type: 'success', message: '操作成功'});
         },
@@ -160,6 +164,7 @@ const vm = new Vue({
             this.watermarks = response.data;
         },
         handleWaterSelected: function(index, image) {
+            this.currentPrint.watermark_id = image.id;
             this.currentPrint.watermark = image.url;
             this.waterSelectorDialogVisible = false;
             this.handleImageUpdate();
