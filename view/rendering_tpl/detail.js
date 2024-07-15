@@ -23,6 +23,7 @@ const vm = new Vue({
         availableTags: [
             {label: '主图', value: 'SKU'},
             {label: '尺寸图', value: 'SIZE'},
+            {label: '模特图', value: 'MODEL'},
             {label: '其他', value: 'OTHER'}
         ]
     },
