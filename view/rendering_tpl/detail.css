@@ -12,7 +12,6 @@ body{background-color:#f4f4f5;}
 .container{display:flex; margin-top: 10px;}
 .container .aside{width: 120px;}
 .container .main{width: 790px;}
-.design-list-empty{width: 790px; height: 400px; /*border: 1px solid #eee; border-radius: 5px;*/}
 .design-list-empty[dragover=true]{background-color: red;}
 
 html,body{font-size: 10px;}
