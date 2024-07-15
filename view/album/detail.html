@@ -41,16 +41,16 @@
                             <div class="section-body">
                                 <el-form :inline="false" :model="album" size="mini" label-width="48px">
                                     <el-form-item label="短代码">
-                                        <el-input v-model="album.code" placeholder="自定义短代码" value=""></el-input>
+                                        <el-input v-model="album.code" placeholder="自定义短代码" value="" v-on:change="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                     <el-form-item label="名称">
-                                        <el-input v-model="album.name" autosize placeholder="相册的名称" v-on:blur="handleUpdateAlbum"></el-input>
+                                        <el-input v-model="album.name" autosize placeholder="相册的名称" v-on:change="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                     <el-form-item label="标签">
-                                        <el-input v-model="album.tag" placeholder="非必填" v-on:blur="handleUpdateAlbum"></el-input>
+                                        <el-input v-model="album.tag" placeholder="非必填"  v-on:change="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                     <el-form-item label="描述">
-                                        <el-input type="textarea" v-model="album.desc" autosize placeholder="非必填" v-on:blur="handleUpdateAlbum"></el-input>
+                                        <el-input type="textarea" v-model="album.desc" autosize placeholder="非必填"  v-on:change="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                 </el-form>
                             </div>
@@ -91,7 +91,7 @@
                                 </el-col>
                             </el-row>
                         </el-header>
-                        <el-main style="overflow:hidden;">
+                        <el-main>
                             <ul id="design-list" v-if="images.length > 0">
                                 <template v-for="(image,index) of images" >
                                     <li class="design-item" :style="zoom" :class="image.isActive ? 'active' : ''" v-if="!image.isDirectory" style="width:100px; cursor: pointer;" v-on:click="handleImageSelect(index, image)">
