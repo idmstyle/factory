@@ -42,7 +42,8 @@ const vm = new Vue({
             composeModel: 0,
             imageSize: '8x',
             templateBaseURL: "/assets/product-templates/",
-            dataBaseURL: "/api/product/sku-template/list"
+            dataBaseURL: "/api/product/sku-template/list",
+            isAddWatermark: true
         },
 
         tplCategories: [], // TPL_GROUP_CATEGORIES
@@ -59,7 +60,10 @@ const vm = new Vue({
         selectedImageCache: [],
         // -------------------------------------------------------
         albumId: '',
-        watermarks: []
+        watermarks: [],
+        tplTags: [
+            '项链', '戒指', '耳饰', '钥匙链', '胸针', '夹片手链', '合金手镯', '牛皮手链', '绒绳手链', '弹力绳手链', '金刚结手链', '绑绳手链', '袖扣',
+        ]
 	},
 	mounted: async function() {
         const response = await core.axios.get('api/rendering_watermarks');

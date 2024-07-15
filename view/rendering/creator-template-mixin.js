@@ -78,19 +78,16 @@ var templateMixin = {
             this.selectedTpls = selection;
             this.selectedTplSuits = selection;
             this.tplCount = selection.length;
-            return this.updatePreviewImages();
+            this.updatePreviewImages();
         },
-        handleTemplateCategoryCommand: function (command) {
-            this.tplCategoryName = command;
-        },
-        handleTemplateSelectAll: function () {
-            this.tplSuits.forEach(row => {
+        handleTplListSelectAll: function () {
+            this.tpls.forEach(row => {
                 if (row.images.length <= 0) return true;
-                this.$refs.tplSuitsTable.toggleRowSelection(row, true);
+                this.$refs.tplListTable.toggleRowSelection(row, true);
             });
         },
-        handleTemplateClearAll: function () {
-            this.$refs.tplSuitsTable.clearSelection();
+        handleTplListClearAll: function () {
+            this.$refs.tplListTable.clearSelection();
         }
     }
 }

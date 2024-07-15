@@ -7,7 +7,9 @@ var sourceMixin = {
         album: {},
         albumImageTag: '圆形',
         sources: [],
-        selectedSources: []
+        // 当前选中的相册图片
+        // 由于模板包含的图片使用了变量名image，所以这里使用的名字为source
+        selectedSources: [],
     },
     watch: {
         album: function (album) {

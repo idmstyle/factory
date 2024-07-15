@@ -58,6 +58,7 @@ function composeImagesByCanvas(imagesToDraw) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     for(let image of imagesToDraw) {
+        if (!vm.options.isAddWatermark && image.targetId.startsWith('watermark')) continue;
         const dom = document.getElementById(image.targetId);
         if (image.rotate == '0') {
             ctx.drawImage(dom, parseFloat(image.left), parseFloat(image.top), parseFloat(image.width), parseFloat(image.height));

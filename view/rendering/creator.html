@@ -24,12 +24,9 @@
             #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
             #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
             #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
-            /* #app-header .menu-container li:hover,#app-header .menu-container li.hover{background-color: white;}
-            #app-header .menu-container li:hover a,#app-header .menu-container li.hover a{color: black;} */
             #app-header .menu-container li:hover{background-color: white;}
             #app-header .menu-container li:hover a{color: black;}
             #app-content{flex-grow: 1; overflow: hidden;}
-            /* #content-iframe{width: 100%; height: 100%; overflow: auto; border: none;padding: 0; margin: 0;} */
         </style>
         <link rel="stylesheet" href="rendering/creator.css">
 	</head>
@@ -53,7 +50,7 @@
                                             default-first-option
                                             reserve-keyword
                                             value-key='id'
-                                            placeholder="使用编号或名称查询"
+                                            placeholder="使用相册代码或名称查询"
                                             :remote-method="albumQuery"
                                             :loading="albumQueryLoading">
                                             <el-option
@@ -72,66 +69,33 @@
                                     </el-form-item>
                                     <el-form-item label="图片尺寸">
                                         <el-radio-group v-model="options.imageSize">
-                                            <el-radio label="8x">8x</el-radio>
-                                            <el-radio label="10x">10x</el-radio>
+                                            <el-radio label="8x">800px</el-radio>
+                                            <el-radio label="10x">1000px</el-radio>
+                                        </el-radio-group>
+                                    </el-form-item>
+                                    <el-form-item label="添加水印">
+                                        <el-radio-group v-model="options.isAddWatermark" v-on:change="updatePreviewImages">
+                                            <el-radio :label="true">是</el-radio>
+                                            <el-radio :label="false">否</el-radio>
                                         </el-radio-group>
                                     </el-form-item>
                                 </el-form>
                             </div>
                         </el-header>
-                        <!-- {-- 支持选择本地原图的模块代码，功能已暂时关闭，代码需要保留 --} -->
-                        <!--{-- <el-main style="padding: 0; background: white;">
-                            <div class="container-item-header">
-                                <div class="container-item-title">相册</div>
-                                <input type="file"
-                                    id="sourceFileSelector"
-                                    ref="sourceFileSelector"
-                                    multiple accept="image/*"
-                                    class="visually-hidden"
-                                    v-on:change="handleSourceChange()"
-                                    style="display: none;"/>
-                                <label for="sourceFileSelector" class="text-button el-button el-button--text el-button--small">本地</label>
-                                <el-button class="text-button " type="text" size="small" @click="handleShowImageSelector">相册</el-button>
-                                <el-button class="text-button " type="text" size="small" @click="handleSourceClear">清空</el-button>
-                            </div>
-                            <div class="container-item-main" v-loading.lock="sourceLoading">
-                                <ul class="source-image-list">
-                                    <li v-for="(image,index) in sources" class="source-image-item">
-                                        <el-image class="source-image"
-                                            :src="image.url" :id="'source-' + image.code" 
-                                            :preview-src-list="sourceImageUrls"
-                                            v-on:load="handleSourceLoad($event, image, index)">
-                                        </el-image>
-                                    </li>
-                                </ul>
-                            </div>
-                        </el-main> --}-->
                         <el-main id="theme-image-container" style="padding: 0; background: white;display:flex;flex-direction: column;">
                             <div class="container-item-header">
                                 <div class="container-item-title">相册</div>
-                                <el-select v-model="albumImageTag" size="mini" placeholder="按形状筛选" style="width:100px; margin-right:20px;">
+                                <div v-if="album.images && album.images.length>0" style="margin-right: 10px;">
+                                    <el-button class="text-button " type="text" size="small" v-on:click="handleSourceSelectAll">全选</el-button>
+                                    <el-button class="text-button " type="text" size="small" v-on:click="handleSourceClearAll">全不选</el-button>
+                                </div>
+                                <el-select v-if="album.images" v-model="albumImageTag" size="mini" placeholder="按形状筛选" style="width:90px;">
                                     <el-option key="圆形" label="圆形" value="圆形"></el-option>
                                     <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
                                     <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
                                 </el-select>
-                                <template>
-                                    <!-- <el-dropdown v-on:command="handleSourceCategoryCommand" size="mini" style="margin-right:15px;">
-                                        <span class="el-dropdown-link">
-                                            <{diaSourceCategory ? diaSourceCategory : '全部形状'}><i class="el-icon-arrow-down el-icon--right"></i>
-                                        </span>
-                                        <el-dropdown-menu slot="dropdown">
-                                            <el-dropdown-item :command="null">全部形状</el-dropdown-item>
-                                            <el-dropdown-item command="圆形">圆形</el-dropdown-item>
-                                            <el-dropdown-item command="20x20心">20x20心</el-dropdown-item>
-                                            <el-dropdown-item command="18x25方">18x25方</el-dropdown-item>
-                                        </el-dropdown-menu>
-                                    </el-dropdown> -->
-                                    <el-button class="text-button " type="text" size="small" v-on:click="handleSourceSelectAll">全选</el-button>
-                                    <el-button class="text-button " type="text" size="small" v-on:click="handleSourceClearAll">全不选</el-button>
-                                </template>
                             </div>
                             <div class="container-item-main" style="overflow-y:hidden;">
-                                <!-- <iframe id="album-image-iframe" v-if="!!albumId" :src="'album-image/index.html?zoom=0.55&albumId=' + albumId" style="width:100%; height: 100%; overflow: hidden; border: none; padding: 0; margin: 0;"></iframe> -->
                                 <ul id="theme-image-list" v-if="!!album.images" style="height:100%; overflow-y:auto;">
                                     <template v-for="(image,index) of album.images">
                                         <li
@@ -165,34 +129,17 @@
                         <div class="container-item-header">
                             <div class="container-item-title" style="width: 80px;">模版</div>
                             <div style="flex-grow: 1;"></div>
-                            <el-dropdown v-on:command="handleTemplateCategoryCommand" size="mini">
-                                <span class="el-dropdown-link">
-                                    <{tplCategoryName ? tplCategoryName : '分类'}><i class="el-icon-arrow-down el-icon--right"></i>
-                                </span>
-                                <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item key="项链" label="项链" command="项链">项链</el-dropdown-item>
-                                    <el-dropdown-item key="戒指" label="戒指" command="戒指">戒指</el-dropdown-item>
-                                    <el-dropdown-item key="耳饰" label="耳饰" command="耳饰">耳饰</el-dropdown-item>
-                                    <el-dropdown-item key="钥匙链" label="钥匙链" command="钥匙链">钥匙链</el-dropdown-item>
-                                    <el-dropdown-item key="胸针" label="胸针" command="胸针">胸针</el-dropdown-item>
-                                    <el-dropdown-item key="夹片手链" label="夹片手链" command="夹片手链">夹片手链</el-dropdown-item>
-                                    <el-dropdown-item key="合金手镯" label="合金手镯" command="合金手镯">合金手镯</el-dropdown-item>
-                                    <el-dropdown-item key="牛皮手链" label="牛皮手链" command="牛皮手链">牛皮手链</el-dropdown-item>
-                                    <el-dropdown-item key="绒绳手链" label="" command="绒绳手链">绒绳手链</el-dropdown-item>
-                                    <el-dropdown-item key="弹力绳手链" label="" command="弹力绳手链">弹力绳手链</el-dropdown-item>
-                                    <el-dropdown-item key="金刚结手链" label="" command="金刚结手链">金刚结手链</el-dropdown-item>
-                                    <el-dropdown-item key="绑绳手链" label="" command="绑绳手链">绑绳手链</el-dropdown-item>
-                                    <el-dropdown-item key="袖扣" label="" command="袖扣">袖扣</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </el-dropdown>
-                            <template v-if="tplSuits.length>0">
-                                <el-button class="text-button" type="text" size="small" v-on:click="handleTemplateSelectAll" style="margin-left:15px;">全选</el-button>
-                                <el-button class="text-button" type="text" size="small" v-on:click="handleTemplateClearAll">全不选</el-button>
-                            </template>
+                            <div v-if="tpls.length>0" style="margin-right: 20px;">
+                                <el-button class="text-button" type="text" size="small" v-on:click="handleTplListSelectAll" style="margin-left:15px;">全选</el-button>
+                                <el-button class="text-button" type="text" size="small" v-on:click="handleTplListClearAll">全不选</el-button>
+                            </div>
+                            <el-select v-model="tplCategoryName" size="mini" placeholder="按标签查找" style="width:110px;">
+                                <el-option v-for="tag in tplTags" :key="tag" :label="tag" :value="tag"></el-option>
+                            </el-select>
                         </div>
                         <div class="container-item-main">
-                            <el-table :data="tpls" ref="tplSuitsTable" style="width: 100%;" row-key="id" current-row-key="1" :highlight-current-row="false" :show-header="false" v-on:selection-change="handleTplSelectionChange">
-                                <el-table-column fixed type="selection" :reserve-selection="true" width="30" align="center" :selectable="isRowSelectable">
+                            <el-table :data="tpls" ref="tplListTable" style="width: 100%;" row-key="id" current-row-key="1" :highlight-current-row="false" :show-header="false" v-on:selection-change="handleTplSelectionChange">
+                                <el-table-column fixed type="selection" :reserve-selection="false" width="30" align="center" :selectable="isRowSelectable">
                                 </el-table-column>
                                 <el-table-column fixed prop="code" label="编号" width="42" align="center">
                                     <template slot-scope="scope">
@@ -232,6 +179,7 @@
                                     type="text"
                                     size="small"
                                     class="text-button"
+                                    v-if="previews.length>0"
                                     v-on:click="imageExportHandle">下载</el-button>
                             </div>
                             <div class="container-item-main" v-loading.lock="previewLoading">
@@ -264,78 +212,20 @@
                                 </ul>
                             </div>
                         </div>
-                        
-                        
                     </el-main>
                 </el-container>
             </el-container>
-            <el-dialog
-            id="source-selector-dialog"
-            title="选择图片"
-            :visible.sync="selectorDialogVisible"
-            custom-class="image-selector-dialog"
-            v-on:opened="handleSelectorDialogOpened"
-            width="70%"
-            :lock-scroll="true"
-            v-cloak>
-            <div slot="title">
-                <el-form size="mini" :inline="true">
-                    <!-- 后期如果提供更多操作选项，可以使用 select 代替 radio group 以节省空间 -->
-                    <!--<el-form-item label="图片类型">
-                        <el-select v-model="diaSourceCategory" size="mini" placeholder="按形状筛选" style="width:100px;">
-                            <el-option key="全部类型" label="全部类型" :value="null"></el-option>
-                            <el-option key="圆形" label="圆形" value="圆形"></el-option>
-                            <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
-                            <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
-                        </el-select>
-                    </el-form-item> -->
-                    <el-form-item label="图片类型">
-                        <el-radio-group v-model="diaSourceCategory">
-                            <el-radio :label="null">全部</el-radio>
-                            <el-radio label="圆形">圆形</el-radio>
-                            <el-radio label="20x20心">20x20心</el-radio>
-                            <el-radio label="18x25方">18x25方</el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-form>
+            <div style="display: none;">
+                <el-image
+                    v-for="(watermark, index) of watermarks"
+                    :id="'watermark-' + watermark.id"
+                    :data-id="'watermark-' + watermark.id"
+                    class="tpl-mark"
+                    :src="watermark.url"
+                    v-on:load="handleResourceLoad($event, watermark)"
+                    crossorigin="anonymous">
+                </el-image>
             </div>
-            <div style="max-height:300px; overflow-y:auto;">
-                <ul id="design-list" v-if="selectorImages.length>0">
-                    <template v-for="(image,index) of selectorImages">
-                        <li
-                            class="design-item" :class="{ active: image.isActive }" v-on:click="handleImageSelect(index, image)" style="cursor:pointer;">
-                            <p class="design-image-wrapper"><img :src="image.url" :alt="image.basename"/></p>
-                            <p class="design-name">
-                                <span contenteditable="false" class="editable-text"><{image.basename}></span>
-                            </p>
-                        </li>
-                        <li class="design-item hidden" v-else>
-                            <p class="design-image-wrapper"><img src="" /></p>
-                            <p class="design-name"></p>
-                        </li>
-                    </template>
-                </ul>
-                <el-empty class="design-list-empty" v-else description="图片库空空如也"></el-empty>
-            </div>
-            <div slot="footer" class="dialog-footer">
-                <el-button v-on:click="selectorDialogVisible = false" size="mini">取 消</el-button>        
-                <el-button v-on:click="handleSelectorConfirm" size="mini">确 定</el-button>
-                <el-button v-on:click="handleSelectorClearAll" size="mini">全不选</el-button>
-                <el-button type="primary" v-on:click="handleSelectorConfirmAll" size="mini">全选 & 确定</el-button>
-            </div>
-        </el-dialog>
-        <div style="display: none;">
-            <el-image
-                v-for="(watermark, index) of watermarks"
-                :id="'watermark-' + watermark.id"
-                :data-id="'watermark-' + watermark.id"
-                class="tpl-mark"
-                :src="watermark.url"
-                v-on:load="handleResourceLoad($event, watermark)"
-                crossorigin="anonymous">
-            </el-image>
-        </div>
-        
         </div>
 
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript"></script>
