@@ -117,15 +117,14 @@
                         <el-form-item label="相册代码">
                             <el-input v-model="album.code" size="mini" style="width:120px;"></el-input>
                         </el-form-item>
-                        <el-form-item style="width:100px;">
-                            <!-- category的值对应图片存放的子目录名称 -->
-                            <!-- 圆形不需要子目录，文件存放时会自动忽略名为“圆形”的子目录结构 -->
+                        <el-form-item style="width:110px;">
                             <el-select v-model="tag" size="mini" placeholder="按形状筛选">
                                 <el-option key="全部类型" label="全部类型" :value="null"></el-option>
                                 <el-option key="圆形" label="圆形" value="圆形"></el-option>
                                 <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
                                 <el-option key="25x25心" label="25x25心" value="25x25心"></el-option>
                                 <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
+                                <el-option key="18x25椭圆" label="18x25椭圆" value="18x25椭圆"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item>
@@ -141,8 +140,6 @@
                                 <p class="design-name">
                                     <span class="editable-text">
                                         <{image.name}>
-                                        <!-- 为避免页面杂乱，不允许不同tag（不同形状）的图片出现在一起，所以这里就不需要重复显示对应的tag了 -->
-                                        <!-- <template v-if="image.tag!='圆形'">(<{image.tag}>)</template> -->
                                     </span>
                                 </p>
                             </li>

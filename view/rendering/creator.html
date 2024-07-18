@@ -89,10 +89,12 @@
                                     <el-button class="text-button " type="text" size="small" v-on:click="handleSourceSelectAll">全选</el-button>
                                     <el-button class="text-button " type="text" size="small" v-on:click="handleSourceClearAll">全不选</el-button>
                                 </div>
-                                <el-select v-if="album.images" v-model="albumImageTag" size="mini" placeholder="按形状筛选" style="width:90px;">
+                                <el-select v-if="album.images" v-model="albumImageTag" size="mini" placeholder="按形状筛选" style="width:110px;">
                                     <el-option key="圆形" label="圆形" value="圆形"></el-option>
                                     <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
+                                    <el-option key="25x25心" label="25x25心" value="25x25心"></el-option>
                                     <el-option key="18x25方" label="18x25方" value="18x25方"></el-option>
+                                    <el-option key="18x25椭圆" label="18x25椭圆" value="18x25椭圆"></el-option>
                                 </el-select>
                             </div>
                             <div class="container-item-main" style="overflow-y:hidden;">

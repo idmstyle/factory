@@ -21,7 +21,8 @@ const vm = new Vue({
         currentPrint: {},
         currentPrintIndex: null,
         availableTags: [
-            {label: '主图', value: 'SKU'},
+            {label: '产品图', value: 'SKU'},
+            {label: '主图', value: 'MAIN'},
             {label: '尺寸图', value: 'SIZE'},
             {label: '模特图', value: 'MODEL'},
             {label: '其他', value: 'OTHER'}
