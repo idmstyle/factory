@@ -317,6 +317,7 @@ const vm = new Vue({
                 'code': this.skuCode
             };
 			const response = await core.axios.get('api/skus', {params: params});
+			this.isAutoCreateVisible = true;
 			if (response.data.length <= 0) {
 				return 'Not Found'
 			}
@@ -332,7 +333,7 @@ const vm = new Vue({
 			}
 
 			this.shapes = shapes;
-			this.isAutoCreateVisible = true;
+			
 			return this.shapes;
 		},
 		shapesAutoCreateHandle: async function () {
@@ -719,9 +720,9 @@ const vm = new Vue({
 			delete shape.id;
 			this.shapes.splice(index, 1, shape);
 		},
-		handleGoToSkuDetail: async function (skuCode) {
+		createSkuDetailLink: function (skuCode) {
 			const url = '/factory/index.html?_path_=view/sku/detail.html?code=' + skuCode;
-			window.open(url, '_blank');
+			return url;
 		},
     }
 });

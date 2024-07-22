@@ -4,29 +4,12 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="version" content ="?v=0.01">
-        <title>快捷制版</title>
+        <title>手动制版</title>
 		<link href="../../static/favicon-256.ico" rel="shortcut icon" type="image/x-icon"/>
         <link href="../../static/favicon-256.ico" rel="icon"/>
         <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
+        <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
         <link rel="stylesheet" href="../../static/css/index.css"/>
-        <style type="text/css">
-            *{padding: 0; margin: 0; font-size: 12px;}
-            html{zoom:1;}
-            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
-            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
-            #app{display: flex; flex-direction: column;}
-            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
-            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
-            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
-            #app-header .menu-container ul{white-space: nowrap;}
-            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
-            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
-            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
-            #app-header .menu-container li:hover{background-color: white;}
-            #app-header .menu-container li:hover a{color: black;}
-            #app-content{flex-grow: 1; overflow: hidden;}
-        </style>
         <link rel="stylesheet" href="index.css">
 	</head>
 	<body>
@@ -34,7 +17,7 @@
 <el-container style="width:100%; height:100%; overflow:hidden;">
     <el-aside width="290px" style="height:100%; overflow:hidden; background-color:white; display:flex; flex-direction:column;" v-cloak>
         <div style="height:190px;" v-cloak>
-            <div style="height:35px; border-bottom:1px solid #eee; font-size:14px; color:#606266; line-height:35px; padding:0 10px;">基础功能</div>
+            <div style="height:35px; border-bottom:1px solid #eee; font-size:14px; color:#606266; line-height:35px; padding:0 10px;">手动制版</div>
             <!-- 修改表单size时，切记在windows下做个测试，宽度表现在windows和mac之间存在区别 -->
             <el-form size="mini" label-width="45px" style="padding:10px;" v-on:submit.native.prevent>
                 <el-form-item label="批次">
@@ -49,7 +32,7 @@
                     <el-button tabIndex="-1" v-on:click="handleCreateBatch">新建</el-button>
                 </el-form-item>
                 <el-form-item label="货号">
-                    <el-input v-model="skuCode" ref="skuIdInput" v-on:keyup.enter.native="handleSubmit" style="width:155px;" placeholder="例：20000101"></el-input>
+                    <el-input v-model="skuCode" ref="skuIdInput" v-on:keyup.enter.native="handleSubmit" style="width:155px;" placeholder="例：20000101" title="货号输入完成后，按下回车键即可快速插入"></el-input>
                     <el-button v-on:click="handleShapesSearch" tabIndex="-1">查询</el-button>
                 </el-form-item>
                 <el-form-item label="数量">
@@ -70,8 +53,15 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="shape_text" label="尺寸" align="center">
+                    <template slot="header" slot-scope="scope">
+                        <span>尺寸</span>
+                        <el-popover placement="right-start" width="200" trigger="hover" content="">
+                            <span style="font-size: 12px;">临时修改要打印的尺寸，只对当前的操作有效，刷新后不会保存</span>
+                            <i slot="reference" class="bi bi-question-circle" style="color: #ddd;"></i>
+                        </el-popover>
+                    </template>
                     <template slot-scope="scope">
-                        <el-select v-model="scope.row.shape_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)">
+                        <el-select v-model="scope.row.shape_id" placeholder="请选择" size="mini" v-on:change="handleShapeChange(scope.$index, scope.row)" style="display: inline-block;">
                             <el-option v-for="item in preshapes" :key="item.id" :label="item.shapeText" :value="item.id"></el-option>
                         </el-select>
                     </template>
@@ -81,13 +71,13 @@
                 </el-table-column>
                 <el-table-column prop="width" label="操作" width="50px" align="center">
                     <template slot-scope="scope">
-                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuCode)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">编辑</a>
+                        <a :href="createSkuDetailLink(skuCode)" target="_blank" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">编辑</a>
                     </template>
                 </el-table-column>
                 <template slot="empty">
                     <div v-if="isAutoCreateVisible">
                         <span>暂无数据，请</span>
-                        <a href="#" v-on:click.prevent="handleGoToSkuDetail(skuCode)" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">手动编辑</a>
+                        <a :href="createSkuDetailLink(skuCode)" target="_blank" type="primary" style="vertical-align:top;color:#409eff; text-decoration: none;">去编辑</a>
                     </div>
                     <div v-else>暂无数据</div>
                 </template>
