@@ -3,30 +3,12 @@
 	<head>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <meta name="version" content ="?v=0.01">
+        <meta name="version" content="?v=0.01">
         <title>相册详情</title>
-		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon"/>
-        <link href="favicon.ico" rel="icon"/>
+		<link href="../../static/favicon-256.ico" rel="shortcut icon" type="image/x-icon"/>
+        <link href="../../static/favicon-256.ico" rel="icon"/>
         <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
         <link rel="stylesheet" href="../../static/css/index.css?v=0.01"/>
-        <style type="text/css">
-            *{padding: 0; margin: 0; font-size: 12px;}
-            html{zoom:1;}
-            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
-            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
-            #app{display: flex; flex-direction: column;}
-            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
-            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
-            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
-            #app-header .menu-container ul{white-space: nowrap;}
-            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
-            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
-            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
-            #app-header .menu-container li:hover{background-color: white;}
-            #app-header .menu-container li:hover a{color: black;}
-            #app-content{flex-grow: 1; overflow: hidden;}
-        </style>
         <link rel="stylesheet" href="detail.css">
 	</head>
 	<body>
@@ -40,17 +22,17 @@
                             </div>
                             <div class="section-body">
                                 <el-form :inline="false" :model="album" size="mini" label-width="48px">
-                                    <el-form-item label="短代码">
-                                        <el-input v-model="album.code" placeholder="自定义短代码" value="" v-on:change="handleUpdateAlbum"></el-input>
+                                    <el-form-item label="代码">
+                                        <el-input v-model="album.code" placeholder="自定义相册代码" value="" v-on:change="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                     <el-form-item label="名称">
                                         <el-input v-model="album.name" autosize placeholder="相册的名称" v-on:change="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                     <el-form-item label="标签">
-                                        <el-input v-model="album.tag" placeholder="非必填"  v-on:change="handleUpdateAlbum"></el-input>
+                                        <el-input v-model="album.tag" placeholder="可以用来备注客户ID，非必填"  v-on:change="handleUpdateAlbum"></el-input>
                                     </el-form-item>
                                     <el-form-item label="描述">
-                                        <el-input type="textarea" v-model="album.desc" autosize placeholder="非必填"  v-on:change="handleUpdateAlbum"></el-input>
+                                        <el-input type="textarea" v-model="album.desc" autosize placeholder="为相册添加更多描述信息，可用于搜索，非必填"  v-on:change="handleUpdateAlbum" :autosize="true"></el-input>
                                     </el-form-item>
                                 </el-form>
                             </div>
@@ -98,9 +80,8 @@
                                             <el-image :id="'image-'+image.name" :src="image.url + '_80x80.png'" fit="contain" style="width: 100%; height: 100%;" title="点击查看图片详情"></el-image>
                                         </p>
                                         <p class="design-name" style="font-size:12px; width:100%;">
-                                            <span class="editable-text" style="font-size:12px;"><!-- contenteditable="true" -->
+                                            <span class="editable-text" style="font-size:12px;">
                                                 <{image.name}>
-                                                <!-- <template v-if="image.tag && image.tag !='圆形'">(<{image.tag}>)</template> -->
                                             </span>
                                         </p>
                                     </li>
@@ -108,7 +89,6 @@
                                     <li class="design-item" v-else style="width: 100px;" :style="zoom">
                                         <a v-on:click="handleOpenChildFolder(image)" style="text-decoration: none; color:black;">
                                             <p class="design-image-wrapper" style="width:100px; height: 100px; padding: 0px; position: relative; overflow: hidden;">
-                                                <!-- <i class="el-icon-folder" style="font-size: 70px;"></i> -->
                                                 <el-image src="static/img/envelope_files_folder_interface_office_icon.png" fit="contain" style="width: 70%; height: 70%; margin-top:18px;"></el-image>
                                             </p>
                                             <p class="design-name" style="width: 100%;">
@@ -132,7 +112,7 @@
                             <el-form-item label="名称">
                                 <el-input v-model="currentImage.name" v-on:change="handleImageUpdate"></el-input>
                             </el-form-item>
-                            <el-form-item label="标签" style="width:110px;">
+                            <el-form-item label="标签">
                                 <el-select v-model="currentImage.tag" size="mini" v-on:change="handleImageUpdate">
                                     <el-option key="圆形" label="圆形" value="圆形"></el-option>
                                     <el-option key="20x20心" label="20x20心" value="20x20心"></el-option>
@@ -142,7 +122,7 @@
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="描述">
-                                <el-input type="textarea" v-model="currentImage.desc" v-on:change="handleImageUpdate" placeholder="为图片添加描述内容，后期将用于图片搜索"></el-input>
+                                <el-input type="textarea" v-model="currentImage.desc" v-on:change="handleImageUpdate" placeholder="为图片添加描述内容，后期将用于图片搜索" :autosize="true"></el-input>
                             </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" v-on:click="handleSetAsAlbumCover">设为封面</el-button>
@@ -156,9 +136,7 @@
         <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
         <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
         <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.26.0/axios.min.js" type="application/javascript" referrerpolicy="no-referrer"></script>
-        <!-- <script src="https://unpkg.com/axios@1.7.2/dist/axios.min.js"></script> -->
         <script type="text/javascript" src="../../static/js/index.js?v=0.01"></script>
-        <!-- <script type="text/javascript" src="app/service/album.js"></script> -->
         <script src="detail.js?v=0.01"></script>
 	</body>
 </html>
