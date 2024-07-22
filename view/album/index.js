@@ -94,7 +94,7 @@ const vm = new Vue({
 		handleCurrentPageChange: async function (current) {
 			this.handleLoadAlbums(current);
 		},
-		handleShowAlbumDetail: function(album) {
+		createAlbumDetailLink: function (album) {
 			let href;
 			if (window != window.parent) {
 				let url = new URL(window.parent.location.href);
@@ -103,7 +103,7 @@ const vm = new Vue({
 			} else {
 				href = 'detail.html?id=' + album.id;
 			}
-			window.open(href, '_blank');
+			return href;
 		},
 		handleSelectDirectory: async function () {
 			const response = await axios.get('/dialog/selectDirectory');

@@ -108,7 +108,7 @@
                     :visible.sync="imageDetailVisible"
                     direction="rtl">
                     <div style="padding: 0 10px;">
-                        <el-form size="mini" v-if="currentImage" label-position="right" label-width="60px">
+                        <el-form size="mini" v-if="currentImage" label-position="right" label-width="60px" v-cloak>
                             <el-form-item label="名称">
                                 <el-input v-model="currentImage.name" v-on:change="handleImageUpdate"></el-input>
                             </el-form-item>
