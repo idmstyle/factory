@@ -92,6 +92,10 @@ const vm = new Vue({
         handleSetAsAlbumCover: async function () {
             let albumId = this.albumId;
             let url = this.currentImage.url;
+
+            // 这里需要更新一下cover，因为在编辑相册详情时会把旧的cover发送到服务器
+            this.album.cover = url;
+
             let response = await core.axios.put(`api/albums/${albumId}`, {cover: url});
             if(response.status == 200) this.$message({type: 'success', message: '设置成功'});
         },
