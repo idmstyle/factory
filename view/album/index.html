@@ -10,30 +10,12 @@
         <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.min.css" type="text/css" rel="stylesheet" />
         <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
         <link rel="stylesheet" href="../../static/css/index.css?v=0.01"/>
-        <style type="text/css">
-            *{padding: 0; margin: 0; font-size: 12px;}
-            html{zoom:1;}
-            html,body,#app{width: 100%; height: 100%; overflow: hidden;}
-            /* loading样式不能放在#app-content，这样会导致在部分没有完全覆盖的页面上一直显示loading */
-            [v-cloak]{display:none; background-image:url( '../../static/img/loading.svg'); background-position: center; background-repeat: no-repeat;}
-            #app{display: flex; flex-direction: column;}
-            #app-header{padding:0 10px; height: 29px; min-height:29px; overflow: hidden; background-color: #363636; color: #999; display: flex;}
-            #app-header .userinfo-container{width: 200px; line-height: 29px; color: #ff7300; text-align:right;}
-            #app-header .menu-container{flex-grow: 1; width: 100%; overflow-x: auto;}
-            #app-header .menu-container ul{white-space: nowrap;}
-            #app-header .menu-container ul, #app-header .menu-container li{padding: 0; margin: 0; height: 100%;}
-            #app-header .menu-container li{list-style: none; display: inline-block; padding: 0 5px; }
-            #app-header .menu-container li a{color: #999; line-height: 29px; text-decoration: none;}
-            #app-header .menu-container li:hover{background-color: white;}
-            #app-header .menu-container li:hover a{color: black;}
-            #app-content{flex-grow: 1; overflow: hidden;}
-        </style>
         <link rel="stylesheet" href="index.css">
 	</head>
 	<body>
         <div id="app" v-cloak v-loading="isLoading">
             <el-container v-cloak style="height:100%;">
-                <el-aside width="270px" style="background-color:white;">
+                <el-aside width="224px" style="background-color:white;">
                     <el-container>
                         <el-header height="39px" style="border-bottom:1px solid #eee; display: flex; flex-direction: row;">
                             <div style="line-height: 39px;font-size: 14px; flex-grow: 1;">我的相册</div>
@@ -42,18 +24,18 @@
                             </div>
                         </el-header>
                         <el-main style="padding:10px 10px 10px 10px; ">
-                            <el-form size="mini" v-on:submit.native.prevent label-width="68px" label-position="right">
+                            <el-form size="mini" v-on:submit.native.prevent label-width="40px" label-position="right">
                                 <el-form-item label="代码">
-                                    <el-input v-model="params.code" placeholder="相册代码" v-on:keyup.enter.native="handleSearch"></el-input>
+                                    <el-input v-model="params.code" placeholder="按相册代码搜索" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label="名称">
-                                    <el-input v-model="params.name" placeholder="相册名称或者标题" v-on:keyup.enter.native="handleSearch"></el-input>
+                                    <el-input v-model="params.name" placeholder="按相册名称搜索" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label="标签">
-                                    <el-input v-model="params.tag" placeholder="标签" v-on:keyup.enter.native="handleSearch"></el-input>
+                                    <el-input v-model="params.tag" placeholder="按标签搜索" v-on:keyup.enter.native="handleSearch"></el-input>
                                 </el-form-item>
                                 <el-form-item label="描述">
-                                    <el-input v-model="params.desc" placeholder="描述" v-on:keyup.enter.native="handleSearch"></el-input>
+                                    <el-input v-model="params.desc" placeholder="按描述搜索" v-on:keyup.enter.native="handleSearch" type="textarea" :autosize="true"></el-input>
                                 </el-form-item>
                                 <el-form-item label=" ">
                                     <el-button plain v-on:click="handleSearch">搜索</el-button>
@@ -121,19 +103,19 @@
                 </el-container>
             </el-container>
             
-            <el-dialog v-cloak title="新建相册" :visible.sync="editFormVisible" width="380px">
-                <el-form ref="edit-form" :model="current" label-width="90px" size="mini">
-                    <el-form-item label="短代码">
+            <el-dialog v-cloak title="新建相册" :visible.sync="editFormVisible" width="368px">
+                <el-form ref="edit-form" :model="current" label-width="64px" size="mini">
+                    <el-form-item label="代码">
                         <el-input v-model="current.code" placeholder="必填项"></el-input>
                     </el-form-item>
-                    <el-form-item label="相册名称">
+                    <el-form-item label="名称">
                         <el-input v-model="current.name" placeholder="必填项"></el-input>
                     </el-form-item>
                     <el-form-item label="标签">
                         <el-input v-model="current.tag" placeholder="非必填项"></el-input>
                     </el-form-item>
                     <el-form-item label="描述">
-                        <el-input type="textarea" v-model="current.desc" placeholder="非必填项"></el-input>
+                        <el-input type="textarea" v-model="current.desc" placeholder="非必填项" :autosize="true"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
